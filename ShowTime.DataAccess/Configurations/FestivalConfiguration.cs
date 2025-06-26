@@ -4,7 +4,7 @@ using ShowTime.DataAccess.Models;
 
 namespace ShowTime.DataAccess.Configurations;
 
-public class FestivalConfigration : IEntityTypeConfiguration<Festival>
+public class FestivalConfiguration : IEntityTypeConfiguration<Festival>
 {
     public void Configure(EntityTypeBuilder<Festival> builder)
     {

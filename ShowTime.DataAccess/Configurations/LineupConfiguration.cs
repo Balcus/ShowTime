@@ -10,5 +10,18 @@ public class LineupConfiguration : IEntityTypeConfiguration<Lineup>
     {
         builder.ToTable("Lineup");
         builder.HasKey(l => new { l.FestivalId, l.ArtistId });
+
+        builder.Property(l => l.Stage).HasMaxLength(255);
+
+        builder
+            .HasOne(l => l.Festival)
+            .WithMany(f => f.Lineups)
+            .HasForeignKey(l => l.FestivalId);
+
+        builder
+            .HasOne(l => l.Artist)
+            .WithMany(a => a.Lineups)
+            .HasForeignKey(l => l.ArtistId);
+    
     }
 }

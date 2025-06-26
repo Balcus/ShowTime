@@ -12,6 +12,8 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(255).IsRequired();
+        builder.Property(x => x.Genre).HasMaxLength(255);
+        builder.Property(x => x.Image).HasMaxLength(255);
         
         builder
             .HasMany(x => x.Festivals)

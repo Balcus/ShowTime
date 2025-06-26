@@ -12,4 +12,5 @@ public class Festival
     
     public ICollection<Lineup> Lineups { get; set; } = new List<Lineup>();
     public ICollection<Artist> Artists { get; set; } = new List<Artist>();
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }
