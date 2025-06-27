@@ -3,13 +3,8 @@ using ShowTime.DataAccess.Models;
 
 namespace ShowTime.DataAccess;
 
-public class ShowTimeDbContext : DbContext
+public class ShowTimeDbContext(DbContextOptions options) : DbContext(options)
 {
-    public ShowTimeDbContext(DbContextOptions options) : base(options)
-    {
-        
-    }
-    
     public DbSet<Lineup> Lineup { get; set; }
     public DbSet<Festival> Festival { get; set; }
     public DbSet<Artist> Artist { get; set; }
