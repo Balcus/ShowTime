@@ -1,14 +1,16 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using ShowTime.DataAccess.Repositories.Interfaces;
 
 namespace ShowTime.DataAccess.Repositories;
 
-public class BaseRepository<TEntity>(DbContext context) : IBaseRepository<TEntity>
+public class BaseRepository<TEntity>(DbContext context) : IRepository<TEntity>
     where TEntity : class
 {
     protected readonly DbContext _context = context;
-    protected readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
+    private readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync()
+    public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
     {
         try
         {
@@ -20,7 +22,7 @@ public class BaseRepository<TEntity>(DbContext context) : IBaseRepository<TEntit
         }
     }
 
-    public async Task<TEntity?> GetByIdAsync(int id)
+    public virtual async Task<TEntity?> GetByIdAsync(int id)
     {
         try
         {
@@ -28,51 +30,66 @@ public class BaseRepository<TEntity>(DbContext context) : IBaseRepository<TEntit
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error while trying to retrieve Entity by ID {id}", ex);
+            throw new Exception($"Error while trying to retrieve Entity by ID: {ex.Message}");
         }
     }
 
-    public async Task CreateAsync(TEntity entity)
+    public virtual async Task CreateAsync(TEntity entity)
     {
         try
         {
-            await _dbSet.AddAsync(entity);
+            _dbSet.Add(entity);
+            await _context.SaveChangesAsync();
         }
-        catch (Exception ex)
+        catch (DbUpdateException e)
         {
-            throw new Exception($"Error while trying to create entity: {ex.Message}");
+            throw new Exception($"Database error while adding new {typeof(TEntity).Name}: {e.InnerException?.Message ?? e.Message}");
+        }
+        catch (ValidationException e)
+        {
+            throw new Exception($"Validation failed while adding {typeof(TEntity).Name}: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Failed to add new {typeof(TEntity).Name}: {e.Message}");
         }
     }
 
-    public async Task UpdateAsync(int id, TEntity entity)
+    public virtual async Task UpdateAsync(TEntity entity)
     {
         try
         {
-            var entry = await _dbSet.FindAsync(id);
-            if (entry != null)
-            {
-                _dbSet.Update(entity);
-            }
+            _dbSet.Update(entity);
+            await _context.SaveChangesAsync();
         }
-        catch (Exception ex)
+        catch (DbUpdateException e)
         {
-            throw new Exception($"Error while trying to update entity: {ex.Message}");
+            throw new Exception($"Database error while updating {typeof(TEntity).Name}: {e.InnerException?.Message ?? e.Message}");
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Failed to update {typeof(TEntity).Name}: {e.Message}");
         }
     }
 
-    public async Task DeleteAsync(int id)
+    public virtual async Task DeleteAsync(int id)
     {
         try
         {
-            var entity = await GetByIdAsync(id);
+            var entity = await _dbSet.FindAsync(id);
             if (entity != null)
             {
                 _dbSet.Remove(entity);
+                await _context.SaveChangesAsync();
             }
         }
-        catch (Exception ex)
+        catch (DbUpdateException e)
         {
-            throw new Exception($"Error while trying to delete entity: {ex.Message}");
+            throw new Exception($"Database error while deleting {typeof(TEntity).Name} with ID {id}: {e.InnerException?.Message ?? e.Message}");
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Failed to delete {typeof(TEntity).Name} with ID {id}: {e.Message}");
         }
     }
 }
