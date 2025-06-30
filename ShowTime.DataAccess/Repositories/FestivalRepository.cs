@@ -4,13 +4,13 @@ using ShowTime.DataAccess.Repositories.Interfaces;
 
 namespace ShowTime.DataAccess.Repositories;
 
-public class FestivalRepository(DbContext context) : BaseRepository<Festival>(context), IFestivalRepository
+public class FestivalRepository(ShowTimeDbContext context) : BaseRepository<Festival>(context), IFestivalRepository
 {
     public virtual async Task<ICollection<Artist>?> GetFestivalArtists(int id)
     {
         try
         {
-            var festival = await _context
+            var festival = await Context
                 .Set<Festival>()
                 .Include(f => f.Artists)
                 .FirstOrDefaultAsync(f => f.Id == id);
@@ -27,7 +27,7 @@ public class FestivalRepository(DbContext context) : BaseRepository<Festival>(co
     {
         try
         {
-            var festival = await _context
+            var festival = await Context
                 .Set<Festival>()
                 .Include(f => f.Lineups)
                 .FirstOrDefaultAsync(f => f.Id == id);

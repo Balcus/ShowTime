@@ -1,0 +1,54 @@
+@page "/artists"
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto
+@inject IArtistService ArtistService;
+
+<h3>Add new artist</h3>
+<EditForm Model="NewArtist" OnSubmit="AddArtist" FormName="AddArtistForm">
+    <label >Name: </label>
+    <InputText @bind-Value="NewArtist.Name" class="form-control"></InputText>
+    <label>Genre: </label>
+    <InputText @bind-Value="NewArtist.Genre" class="form-control"></InputText>
+    <label>Image: </label>
+    <InputText @bind-Value="NewArtist.Image" class="form-control"></InputText>
+    
+    <button class="btn btn-primary">Add Band</button>
+</EditForm>
+
+<h3>Artists</h3>
+
+@if (_artists.Count == 0)
+{
+    <h1>No Artists Added !</h1>
+}
+else
+{
+    <div class="row">
+        @foreach (var artist in _artists)
+        {
+            <div class="card mb-3">
+                <img class="card-img-top" src="@artist.Image" alt="@artist.Name"/>
+                <p>@artist.Name</p>
+                <p>@artist.Genre</p>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private IList<ArtistGetDto> _artists = new List<ArtistGetDto>();
+    [SupplyParameterFromForm]
+    private ArtistCreateDto NewArtist { get; set; } = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _artists = await ArtistService.GetAllArtistsAsync();
+    }
+
+    private async Task AddArtist()
+    {
+        await ArtistService.AddArtistAsync(NewArtist);
+        NewArtist = new ArtistCreateDto();
+        _artists = await ArtistService.GetAllArtistsAsync();
+    }
+}

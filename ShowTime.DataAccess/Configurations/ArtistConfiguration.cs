@@ -13,7 +13,7 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(255).IsRequired();
         builder.Property(x => x.Genre).HasMaxLength(255);
-        builder.Property(x => x.Image).HasMaxLength(255);
+        builder.Property(x => x.Image).HasMaxLength(1024);
         
         builder
             .HasMany(x => x.Festivals)

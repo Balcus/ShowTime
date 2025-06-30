@@ -4,17 +4,16 @@ using ShowTime.DataAccess.Repositories.Interfaces;
 
 namespace ShowTime.DataAccess.Repositories;
 
-public class BaseRepository<TEntity>(DbContext context) : IRepository<TEntity>
+public class BaseRepository<TEntity>(ShowTimeDbContext context) : IRepository<TEntity>
     where TEntity : class
 {
-    protected readonly DbContext _context = context;
-    private readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
+    protected readonly ShowTimeDbContext Context = context;
 
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
     {
         try
         {
-            return await _dbSet.ToListAsync();
+            return await Context.Set<TEntity>().ToListAsync();
         }
         catch (Exception ex)
         {
@@ -26,7 +25,7 @@ public class BaseRepository<TEntity>(DbContext context) : IRepository<TEntity>
     {
         try
         {
-            return await _dbSet.FindAsync(id);
+            return await Context.Set<TEntity>().FindAsync(id);
         }
         catch (Exception ex)
         {
@@ -38,8 +37,8 @@ public class BaseRepository<TEntity>(DbContext context) : IRepository<TEntity>
     {
         try
         {
-            _dbSet.Add(entity);
-            await _context.SaveChangesAsync();
+            Context.Set<TEntity>().Add(entity);
+            await Context.SaveChangesAsync();
         }
         catch (DbUpdateException e)
         {
@@ -59,8 +58,8 @@ public class BaseRepository<TEntity>(DbContext context) : IRepository<TEntity>
     {
         try
         {
-            _dbSet.Update(entity);
-            await _context.SaveChangesAsync();
+            Context.Set<TEntity>().Update(entity);
+            await Context.SaveChangesAsync();
         }
         catch (DbUpdateException e)
         {
@@ -76,11 +75,11 @@ public class BaseRepository<TEntity>(DbContext context) : IRepository<TEntity>
     {
         try
         {
-            var entity = await _dbSet.FindAsync(id);
+            var entity = await Context.Set<TEntity>().FindAsync(id);
             if (entity != null)
             {
-                _dbSet.Remove(entity);
-                await _context.SaveChangesAsync();
+                Context.Set<TEntity>().Remove(entity);
+                await Context.SaveChangesAsync();
             }
         }
         catch (DbUpdateException e)

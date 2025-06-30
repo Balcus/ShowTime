@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using ShowTime.BusinessLogic.Abstractions;
+using ShowTime.BusinessLogic.Services;
 using ShowTime.Components;
 using ShowTime.DataAccess;
 using ShowTime.DataAccess.Models;
@@ -12,11 +14,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ShowTimeDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IRepository<User>, UserRepository>();
-builder.Services.AddScoped<IRepository<Festival>, FestivalRepository>();
-builder.Services.AddScoped<IRepository<Artist>, BaseRepository<Artist>>();
-builder.Services.AddScoped<IRepository<Lineup>, BaseRepository<Lineup>>();
-builder.Services.AddScoped<IRepository<Booking>, BaseRepository<Booking>>();
+// builder.Services.AddTransient<IUserRepository, UserRepository>();
+// builder.Services.AddTransient<IFestivalRepository, FestivalRepository>();
+builder.Services.AddTransient<IRepository<Artist>, BaseRepository<Artist>>();
+// builder.Services.AddTransient<IRepository<Lineup>, BaseRepository<Lineup>>();
+// builder.Services.AddTransient<IRepository<Booking>, BaseRepository<Booking>>();
+
+builder.Services.AddTransient<IArtistService, ArtistService>();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

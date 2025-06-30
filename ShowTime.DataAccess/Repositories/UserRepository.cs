@@ -4,13 +4,13 @@ using ShowTime.DataAccess.Repositories.Interfaces;
 
 namespace ShowTime.DataAccess.Repositories;
 
-public class UserRepository(DbContext context) : BaseRepository<User>(context), IUserRepository
+public class UserRepository(ShowTimeDbContext context) : BaseRepository<User>(context), IUserRepository
 {
     public async Task<ICollection<Booking>?> GetUserBookingsAsync(int id)
     {
         try
         {
-            var user = await _context
+            var user = await Context
                 .Set<User>()
                 .Include(u => u.Bookings)
                 .FirstOrDefaultAsync(u => u.Id == id);

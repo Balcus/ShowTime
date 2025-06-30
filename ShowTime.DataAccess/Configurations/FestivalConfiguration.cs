@@ -13,7 +13,7 @@ public class FestivalConfiguration : IEntityTypeConfiguration<Festival>
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).IsRequired().HasMaxLength(255);
         builder.Property(x => x.Location).IsRequired().HasMaxLength(255);
-        builder.Property(x => x.SplashArt).HasMaxLength(100);
+        builder.Property(x => x.SplashArt).HasMaxLength(1024);
 
         builder
             .HasMany(x => x.Artists)
