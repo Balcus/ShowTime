@@ -1,4 +1,4 @@
-namespace ShowTime.BusinessLogic.Dto;
+namespace ShowTime.BusinessLogic.Dto.ArtistDto;
 
 public class ArtistCreateDto
 {

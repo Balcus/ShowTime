@@ -1,5 +1,6 @@
 using ShowTime.BusinessLogic.Abstractions;
 using ShowTime.BusinessLogic.Dto;
+using ShowTime.BusinessLogic.Dto.ArtistDto;
 using ShowTime.DataAccess.Models;
 using ShowTime.DataAccess.Repositories.Interfaces;
 

@@ -1,44 +1,74 @@
 @page "/artists"
 @using ShowTime.BusinessLogic.Abstractions
-@using ShowTime.BusinessLogic.Dto
+@using ShowTime.BusinessLogic.Dto.ArtistDto
 @inject IArtistService ArtistService;
+<link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet">
 
-<h3>Add new artist</h3>
-<EditForm Model="NewArtist" OnSubmit="AddArtist" FormName="AddArtistForm">
-    <label >Name: </label>
-    <InputText @bind-Value="NewArtist.Name" class="form-control"></InputText>
-    <label>Genre: </label>
-    <InputText @bind-Value="NewArtist.Genre" class="form-control"></InputText>
-    <label>Image: </label>
-    <InputText @bind-Value="NewArtist.Image" class="form-control"></InputText>
-    
-    <button class="btn btn-primary">Add Band</button>
-</EditForm>
+<PageTitle>Artists</PageTitle>
+<div class="page">
+    <div class="content">
+        @* <h3>Add new artist</h3> *@
+        @* <EditForm Model="NewArtist" OnSubmit="AddArtist" FormName="AddArtistForm"> *@
+        @*     <label >Name: </label> *@
+        @*     <InputText @bind-Value="NewArtist.Name" class="form-control"></InputText> *@
+        @*     <label>Genre: </label> *@
+        @*     <InputText @bind-Value="NewArtist.Genre" class="form-control"></InputText> *@
+        @*     <label>Image: </label> *@
+        @*     <InputText @bind-Value="NewArtist.Image" class="form-control"></InputText> *@
+        @* *@
+        @*     <button class="btn btn-primary">Add Band</button> *@
+        @* </EditForm> *@
 
-<h3>Artists</h3>
-
-@if (_artists.Count == 0)
-{
-    <h1>No Artists Added !</h1>
-}
-else
-{
-    <div class="row">
-        @foreach (var artist in _artists)
+        @if (_artists.Count == 0)
         {
-            <div class="card mb-3">
-                <img class="card-img-top" src="@artist.Image" alt="@artist.Name"/>
-                <p>@artist.Name</p>
-                <p>@artist.Genre</p>
-            </div>
+            <h1>No Artists Added !</h1>
+        }
+        else
+        {
+            <ul>
+                @foreach (var artist in _artists)
+                {
+                    var bgColor = GetRandomColor();
+                    <li>
+                        <div class="sticky-note" style="background: @bgColor">
+                            <img src="@artist.Image" alt="@artist.Name logo"/>
+                            <h2>@artist.Name</h2>
+                            <p>@artist.Genre</p>
+                            <div class="controls">
+                                <button @onclick="@(() => Console.WriteLine($"Button clicked for ID: {artist.Id}"))">🗑️</button>
+                                <button>✏️</button>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
         }
     </div>
-}
+</div>
+
+
 
 @code {
     private IList<ArtistGetDto> _artists = new List<ArtistGetDto>();
     [SupplyParameterFromForm]
     private ArtistCreateDto NewArtist { get; set; } = new();
+
+    private readonly string[] _stickyNotesColor =
+    [
+        "#ff7eb9 ",
+        "#ff65a3 ",
+        "#7afcff ",
+        "#feff9c",
+        "#fff740"
+    ];
+
+    private readonly Random _random = new Random();
+
+    private String GetRandomColor()
+    {
+        int i = _random.Next(_stickyNotesColor.Length);
+        return _stickyNotesColor[i];
+    }
     
     protected override async Task OnInitializedAsync()
     {
@@ -50,5 +80,13 @@ else
         await ArtistService.AddArtistAsync(NewArtist);
         NewArtist = new ArtistCreateDto();
         _artists = await ArtistService.GetAllArtistsAsync();
+    }
+
+    private async Task DeleteArtist(int id)
+    {
+        Console.WriteLine($"Delete method called with id: {id}");
+        await ArtistService.DeleteArtistAsync(id);
+        _artists = await ArtistService.GetAllArtistsAsync();
+
     }
 }

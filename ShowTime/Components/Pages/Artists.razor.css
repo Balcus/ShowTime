@@ -1,0 +1,89 @@
+.page {
+    background-color: #DDF6D2;
+    min-height: 100vh;
+}
+
+.content {
+    margin: 0 auto;
+    font-family: 'Lato', sans-serif;
+    color: black;
+}
+
+h2 {
+    font-weight: bold;
+    font-size: 2rem;
+    margin: 0.8em 0 0.2em;
+    text-align: center;
+}
+
+p {
+    font-family: 'Reenie Beanie', sans-serif;
+    font-size: 2rem;
+    text-align: center;
+    margin: 0;
+}
+
+ul, li {
+    list-style: none;
+    padding: 0;
+    margin: 5% 0 0;
+}
+
+ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0;
+}
+
+ul li {
+    margin: 1em;
+}
+
+ul li .sticky-note {
+    text-decoration: none;
+    color: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 20em;
+    width: 20em;
+    padding: 0.5em;
+    box-shadow: 5px 5px 7px rgba(33, 33, 33, 0.7);
+    overflow: hidden;
+    text-align: center;
+}
+
+ul li .sticky-note img {
+    margin-top: 1em;
+    max-width: 100%;
+    max-height: 6em;
+    object-fit: contain;
+    border-radius: 0.25em;
+}
+
+ul li:nth-child(even) .sticky-note {
+    transform: rotate(4deg);
+    position: relative;
+    top: 5px;
+}
+
+ul li:nth-child(3n) .sticky-note {
+    transform: rotate(-3deg);
+    position: relative;
+    top: -5px;
+}
+
+ul li:nth-child(5n) .sticky-note {
+    transform: rotate(5deg);
+    position: relative;
+    top: -10px;
+}
+
+ul li button {
+    border: none;
+    background: none;
+    width: 2em;
+    height: 2em;
+}

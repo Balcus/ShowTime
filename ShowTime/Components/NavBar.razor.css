@@ -1,0 +1,101 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    background-color: #ffffff;
+    border: 4px solid #000000;
+    font-family: 'Arial Black', Arial, sans-serif;
+    position: relative;
+}
+
+.navbar-left {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex: 1;
+    padding-left: 2rem;
+}
+
+.navbar-center {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+}
+
+.navbar-right {
+    display: flex;
+    justify-content: flex-end;
+    flex: 1;
+    padding-right: 2rem;
+}
+
+.logo {
+    font-size: 2rem;
+    font-weight: 900;
+    margin: 0;
+    color: #000000;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border: 3px solid #000000;
+    padding: 0.5rem 1.5rem;
+    background-color: #ff6b6b;
+    box-shadow: 4px 4px 0 #000000;
+    transform: rotate(-1deg);
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #000000;
+    font-weight: 900;
+    font-size: 1.1rem;
+    padding: 0.8rem 1.5rem;
+    border: 3px solid #000000;
+    background-color: #ffd93d;
+    box-shadow: 4px 4px 0 #000000;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.1s ease;
+    transform: rotate(1deg);
+}
+
+.nav-link:hover {
+    transform: rotate(-1deg) translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #000000;
+    background-color: #ffed4e;
+}
+
+.nav-link:active {
+    transform: rotate(1deg) translate(2px, 2px);
+    box-shadow: 2px 2px 0 #000000;
+}
+
+.user-profile-button-link {
+    text-decoration: none;
+}
+
+.user-profile-button {
+    padding: 0.8rem 2rem;
+    background-color: #6bcf7f;
+    border: 4px solid #000000;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 4px 4px 0 #000000;
+    transform: rotate(-1deg);
+    transition: all 0.1s ease;
+}
+
+.user-profile-button:hover {
+    background-color: #7dd87f;
+    transform: rotate(1deg) translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #000000;
+}
+
+.user-profile-button:active {
+    transform: rotate(-1deg) translate(2px, 2px);
+    box-shadow: 2px 2px 0 #000000;
+}

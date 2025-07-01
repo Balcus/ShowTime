@@ -1,4 +1,5 @@
 using ShowTime.BusinessLogic.Dto;
+using ShowTime.BusinessLogic.Dto.ArtistDto;
 using ShowTime.DataAccess.Models;
 
 namespace ShowTime.BusinessLogic.Abstractions;
