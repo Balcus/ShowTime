@@ -5,14 +5,9 @@
     <div class="overlay">
         <div class="dialog">
             <div class="dialog-header">
-                <div>
-                    <h2>@Title</h2>
-                </div>
-
+                <div><h2>@Title</h2></div>
                 <div @onclick="CloseDialog">
-                    <div class="close">
-                        <p>X</p>
-                    </div>
+                    <div class="close"><p>X</p></div>
                 </div>
             </div>
 
@@ -26,6 +21,7 @@
         </div>
     </div>
 }
+
 
 @code {
     [Parameter] public string? Title { get; set; }

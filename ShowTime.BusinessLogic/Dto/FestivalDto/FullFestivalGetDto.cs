@@ -3,7 +3,7 @@ using ShowTime.BusinessLogic.Dto.LineupDto;
 
 namespace ShowTime.BusinessLogic.Dto.FestivalDto;
 
-public class FestivalGetDto
+public class FullFestivalGetDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -12,4 +12,6 @@ public class FestivalGetDto
     public DateTime EndDate { get; set; }
     public string SplashArt { get; set; } = string.Empty;
     public int Capacity { get; set; }
+    public IList<LineupGetDto> Lineups { get; set; } = new List<LineupGetDto>();
+    public IList<FestivalArtistGetDto> Artists { get; set; } = new List<FestivalArtistGetDto>();
 }

@@ -4,20 +4,82 @@
 @inject IFestivalService FestivalService
 @rendermode InteractiveServer
 
-<h3>Festivals</h3>
-<ul>
-    @foreach (var festival in _festivals)
-    {
-        <li>@festival.Name</li>
-    }
-</ul>
+@* TODO: CRUD on Festivals, use validation, make the search-bar part of the navbar and make it *@
+@* behave differently depending on the page, figure out how u want to add bands and lineups ,*@
+@* maybe a new table for genre (A LOT)  :) *@
 
+<PageTitle>Festivals</PageTitle>
+
+<div class="festivals-container">
+    <div class="search-container">
+        <div class="search-bar">
+            <input type="text" placeholder="SEARCH FESTIVALS..." class="search-input" />
+            <button class="search-button">🔍</button>
+        </div>
+    </div>
+
+    <div class="festivals-stack">
+        @foreach (var festival in _festivals)
+        {
+            <div class="festival-card">
+                
+                <div class="card-actions">
+                    <button class="action-btn view-btn">👁️</button>
+                    <button class="action-btn edit-btn">✏️</button>
+                    <button class="action-btn remove-btn">🗑️</button>
+                </div>
+
+                <div class="festival-content">
+                    <div class="festival-splash">
+                        <img src="@festival.SplashArt"
+                             alt="@festival.Name"
+                             class="splash-image"/>
+                    </div>
+
+                    <div class="festival-info">
+                        <div class="festival-header">
+                            <h2 class="festival-name">@festival.Name</h2>
+
+                            <div class="festival-meta">
+                                <span class="location-badge">📍 @festival.Location</span>
+                                <span class="date-badge">📅 @festival.StartDate.ToString("MMM dd") - @festival.EndDate.ToString("MMM dd")</span>
+                                <span class="capacity-badge">👥 @festival.Capacity</span>
+                            </div>
+                        </div>
+
+                        <div class="artists-section">
+                            <div class="artists-grid">
+                                @foreach (var artist in festival.Artists.Take(6))
+                                {
+                                    <div class="artist-badge">
+                                        @if (!string.IsNullOrEmpty(artist.Image))
+                                        {
+                                            <img src="@artist.Image" alt="@artist.Name" class="artist-image"/>
+                                        }
+                                        <span class="artist-name">@artist.Name</span>
+                                    </div>
+                                }
+                                @if (festival.Artists.Count > 6)
+                                {
+                                    <div class="artist-badge more-artists">
+                                        <span class="more-count">+@(festival.Artists.Count - 6)</span>
+                                        <span class="more-text">MORE</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
 
 @code {
-    private IList<FestivalGetDto> _festivals = new List<FestivalGetDto>();
+    private IList<FullFestivalGetDto> _festivals = new List<FullFestivalGetDto>();
     
     protected override async Task OnInitializedAsync()
     {
-        _festivals = await FestivalService.GetAllAsync();
+        _festivals = await FestivalService.GetAllFestivalsFullAsync();
     }
 }

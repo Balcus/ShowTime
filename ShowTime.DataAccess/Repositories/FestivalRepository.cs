@@ -6,7 +6,15 @@ namespace ShowTime.DataAccess.Repositories;
 
 public class FestivalRepository(ShowTimeDbContext context) : BaseRepository<Festival>(context), IFestivalRepository
 {
-    public virtual async Task<ICollection<Artist>?> GetFestivalArtists(int id)
+    public override async Task<IEnumerable<Festival>> GetAllAsync()
+    {
+        return await Context
+            .Set<Festival>()
+            .Include(f => f.Lineups)
+            .Include(f => f.Artists)
+            .ToListAsync();
+    }
+    public async Task<ICollection<Artist>?> GetFestivalArtists(int id)
     {
         try
         {

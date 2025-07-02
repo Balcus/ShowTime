@@ -1,13 +1,48 @@
 using ShowTime.BusinessLogic.Abstractions;
 using ShowTime.BusinessLogic.Dto.FestivalDto;
+using ShowTime.BusinessLogic.Dto.LineupDto;
 using ShowTime.DataAccess.Models;
 using ShowTime.DataAccess.Repositories.Interfaces;
 
 namespace ShowTime.BusinessLogic.Services;
 
-public class FestivalService(IRepository<Festival> festivalRepository) : IFestivalService
+public class FestivalService(IFestivalRepository festivalRepository) : IFestivalService
 {
-    public async Task<IList<FestivalGetDto>> GetAllAsync()
+    public async Task<List<FullFestivalGetDto>> GetAllFestivalsFullAsync()
+    {
+        try
+        {
+            var festivals = await festivalRepository.GetAllAsync();
+            return festivals.Select(f => new FullFestivalGetDto
+            {
+                Id = f.Id,
+                Name = f.Name,
+                Capacity = f.Capacity,
+                EndDate = f.EndDate,
+                StartDate = f.StartDate,
+                Location = f.Location,
+                SplashArt = f.SplashArt,
+                Artists = f.Artists.Select(a => new FestivalArtistGetDto
+                {
+                    Name = a.Name,
+                    Image = a.Image,
+                }).ToList(),
+                Lineups = f.Lineups.Select(l => new LineupGetDto{
+                    FestivalId = l.FestivalId,
+                    ArtistId = l.ArtistId,
+                    StartTime = l.StartTime,
+                    Stage = l.Stage,
+                }).ToList()
+            }).ToList();
+            
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"An error occured while retrieving all festivals : {e.Message}");
+        }
+    }
+    
+    public async Task<IList<FestivalGetDto>> GetAllFestivalsAsync()
     {
         try
         {
@@ -29,25 +64,22 @@ public class FestivalService(IRepository<Festival> festivalRepository) : IFestiv
         }
     }
 
-    public async Task<FestivalGetDto?> GetByIdAsync(int id)
+    public async Task<FestivalGetDto?> GetFestivalByIdAsync(int id)
     {
         try
         {
             var festival = await festivalRepository.GetByIdAsync(id);
-            if (festival != null)
+            if (festival == null) return null;
+            return new FestivalGetDto
             {
-                return new FestivalGetDto
-                {
-                    Id = festival.Id,
-                    Name = festival.Name,
-                    Capacity = festival.Capacity,
-                    EndDate = festival.EndDate,
-                    StartDate = festival.StartDate,
-                    Location = festival.Location,
-                    SplashArt = festival.SplashArt,
-                };
-            }
-            return null;
+                Id = festival.Id,
+                Name = festival.Name,
+                Capacity = festival.Capacity,
+                EndDate = festival.EndDate,
+                StartDate = festival.StartDate,
+                Location = festival.Location,
+                SplashArt = festival.SplashArt,
+            };
         }
         catch (Exception e)
         {
@@ -55,7 +87,7 @@ public class FestivalService(IRepository<Festival> festivalRepository) : IFestiv
         }
     }
 
-    public async Task AddAsync(FestivalCreateDto festivalCreateDto)
+    public async Task AddFestivalAsync(FestivalCreateDto festivalCreateDto)
     {
         try
         {
@@ -76,7 +108,7 @@ public class FestivalService(IRepository<Festival> festivalRepository) : IFestiv
         }
     }
 
-    public async Task UpdateAsync(int id, FestivalCreateDto festivalUpdateDro)
+    public async Task UpdateFestivalAsync(int id, FestivalCreateDto festivalUpdateDro)
     {
         try
         {
@@ -98,7 +130,7 @@ public class FestivalService(IRepository<Festival> festivalRepository) : IFestiv
         }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteFestivalAsync(int id)
     {
         try
         {
@@ -107,6 +139,27 @@ public class FestivalService(IRepository<Festival> festivalRepository) : IFestiv
         catch (Exception e)
         {
             throw new Exception($"An error occured while deleting festival with id {id}: {e.Message}");
+        }
+    }
+
+    public async Task<List<LineupGetDto>?> GetLineupsForFestival(int festivalId)
+    {
+        try
+        {
+            var festival = await festivalRepository.GetByIdAsync(festivalId);
+            if (festival == null) return null;
+            return festival.Lineups.Select(l => new LineupGetDto
+            {
+                FestivalId = festival.Id,
+                ArtistId = l.ArtistId,
+                Stage = l.Stage,
+                StartTime = l.StartTime,
+            }).Distinct().ToList();
+
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error while trying to return lineups for festival with id {festivalId}: {e.Message}");
         }
     }
 }

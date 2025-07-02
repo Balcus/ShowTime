@@ -3,13 +3,14 @@
 @using ShowTime.BusinessLogic.Dto.ArtistDto
 @inject IArtistService ArtistService;
 @rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations;
 <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet">
 
 <PageTitle>Artists</PageTitle>
 <div class="page">
     <div class="content">
         <div class="add-container">
-            <button @onclick="ShowAddDialog" class="round">&#10133;</button>
+            <button @onclick="ShowAddDialog" class="add">📌</button>
         </div>
 
         @if (_artists.Count == 0)
@@ -29,41 +30,46 @@
                             <p>@artist.Genre</p>
                             <div class="controls">
                                 <button @onclick="@(async () => await DeleteArtistAsync(artist.Id))">🗑️</button>
-                                <button>✏️</button>
+                                <button @onclick="@(() => ShowUpdateDialog(artist))">✏️</button>
                             </div>
                         </div>
                     </li>
                 }
             </ul>
+            
             <Dialog Title="Add New Artist" Opened="_showAddDialog" CloseButtonClicked="@(() => _showAddDialog = false)">
                 <BodyContent>
-                    <EditForm Model="NewArtist" OnSubmit="AddArtistAsync" FormName="AddArtistForm">
-                        <label >Name: </label>
-                        <InputText @bind-Value="NewArtist.Name" class="form-control"></InputText>
-                        <label>Genre: </label>
-                        <InputText @bind-Value="NewArtist.Genre" class="form-control"></InputText>
-                        <label>Image: </label>
-                        <InputText @bind-Value="NewArtist.Image" class="form-control"></InputText>
-                    
-                        <button class="btn btn-primary">Add Band</button>
-                    </EditForm>
+                    <div class="sticky-form">
+                        <EditForm Model="NewArtist" OnValidSubmit="AddArtistAsync" FormName="AddArtistForm">
+                            <DataAnnotationsValidator />
+                            <label>Name:</label>
+                            <InputText @bind-Value="NewArtist.Name" class="form-control"/>
+                            <label>Genre:</label>
+                            <InputText @bind-Value="NewArtist.Genre" class="form-control"/>
+                            <label>Image:</label>
+                            <InputText @bind-Value="NewArtist.Image" class="form-control"/>
+                            <button class="btn">Add Band</button>
+                        </EditForm>
+                    </div>
                 </BodyContent>
             </Dialog>
             
-            // TODO: Do the update functionality, validations on filed using annotations, filtering and ordering and maybe make
-            // a new table for genre
-            <Dialog Title="Edit Artist" Opened="_showUpdateDialog" CloseButtonClicked="@(() => _showUpdateDialog = false)">
+            <Dialog Title="Update Artist" Opened="_showUpdateDialog" CloseButtonClicked="@(() => _showUpdateDialog = false)">
                 <BodyContent>
-                    <EditForm Model="UpdatedArtist" OnSubmit="AddArtistAsync" FormName="UpdateArtistForm">
-                        <label >New Name: </label>
-                        <InputText  @bind-Value="UpdatedArtist.Name" class="form-control"></InputText>
-                        <label>New Genre: </label>
-                        <InputText @bind-Value="UpdatedArtist.Genre" class="form-control"></InputText>
-                        <label>New Image: </label>
-                        <InputText @bind-Value="UpdatedArtist.Image" class="form-control"></InputText>
-                    
-                        <button class="btn btn-primary">Update Band</button>
-                    </EditForm>
+                    <div class="sticky-form">
+                        <EditForm Model="UpdatedArtist" OnValidSubmit="SubmitUpdatedArtistAsync">
+                            <DataAnnotationsValidator/>
+                            <ValidationSummary/>
+                            <label>New Name:</label>
+                            
+                            <InputText @bind-Value="UpdatedArtist.Name" class="form-control"/>
+                            <label>New Genre:</label>
+                            <InputText @bind-Value="UpdatedArtist.Genre" class="form-control"/>
+                            <label>New Image:</label>
+                            <InputText @bind-Value="UpdatedArtist.Image" class="form-control"/>
+                            <button class="btn btn-primary">Update Band</button>
+                        </EditForm>
+                    </div>
                 </BodyContent>
             </Dialog>
         }
@@ -73,6 +79,7 @@
 
 
 @code {
+    private int _editArtistId;
     private bool _showAddDialog = false;
     private bool _showUpdateDialog = false;
     private IList<ArtistGetDto> _artists = new List<ArtistGetDto>();
@@ -93,9 +100,9 @@
 
     private readonly Random _random = new Random();
 
-    private String GetRandomColor()
+    private string GetRandomColor()
     {
-        int i = _random.Next(_stickyNotesColor.Length);
+        var i = _random.Next(_stickyNotesColor.Length);
         return _stickyNotesColor[i];
     }
     
@@ -123,15 +130,23 @@
         _showAddDialog = true;
     }
     
-    private void ShowUpdateDialog()
+    private void ShowUpdateDialog(ArtistGetDto updatedArtist)
     {
+        _editArtistId = updatedArtist.Id;
+        UpdatedArtist = new ArtistCreateDto()
+        {
+            Name = updatedArtist.Name,
+            Genre = updatedArtist.Genre,
+            Image = updatedArtist.Image,
+        };
         _showUpdateDialog = true;
     }
 
-    private async Task UpdateArtistAsync(int id)
+    private async Task SubmitUpdatedArtistAsync()
     {
-        await ArtistService.UpdateArtistAsync(id, UpdatedArtist);
+        await ArtistService.UpdateArtistAsync(_editArtistId, UpdatedArtist);
         UpdatedArtist = new ArtistCreateDto();
         _artists = await ArtistService.GetAllArtistsAsync();
+        _showUpdateDialog = false;
     }
 }
