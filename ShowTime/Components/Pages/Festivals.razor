@@ -1,0 +1,23 @@
+@page "/festivals"
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.FestivalDto
+@inject IFestivalService FestivalService
+@rendermode InteractiveServer
+
+<h3>Festivals</h3>
+<ul>
+    @foreach (var festival in _festivals)
+    {
+        <li>@festival.Name</li>
+    }
+</ul>
+
+
+@code {
+    private IList<FestivalGetDto> _festivals = new List<FestivalGetDto>();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _festivals = await FestivalService.GetAllAsync();
+    }
+}

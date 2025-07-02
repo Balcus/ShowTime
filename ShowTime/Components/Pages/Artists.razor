@@ -2,22 +2,15 @@
 @using ShowTime.BusinessLogic.Abstractions
 @using ShowTime.BusinessLogic.Dto.ArtistDto
 @inject IArtistService ArtistService;
+@rendermode InteractiveServer
 <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet">
 
 <PageTitle>Artists</PageTitle>
 <div class="page">
     <div class="content">
-        @* <h3>Add new artist</h3> *@
-        @* <EditForm Model="NewArtist" OnSubmit="AddArtist" FormName="AddArtistForm"> *@
-        @*     <label >Name: </label> *@
-        @*     <InputText @bind-Value="NewArtist.Name" class="form-control"></InputText> *@
-        @*     <label>Genre: </label> *@
-        @*     <InputText @bind-Value="NewArtist.Genre" class="form-control"></InputText> *@
-        @*     <label>Image: </label> *@
-        @*     <InputText @bind-Value="NewArtist.Image" class="form-control"></InputText> *@
-        @* *@
-        @*     <button class="btn btn-primary">Add Band</button> *@
-        @* </EditForm> *@
+        <div class="add-container">
+            <button @onclick="ShowAddDialog" class="round">&#10133;</button>
+        </div>
 
         @if (_artists.Count == 0)
         {
@@ -35,13 +28,44 @@
                             <h2>@artist.Name</h2>
                             <p>@artist.Genre</p>
                             <div class="controls">
-                                <button @onclick="@(() => Console.WriteLine($"Button clicked for ID: {artist.Id}"))">🗑️</button>
+                                <button @onclick="@(async () => await DeleteArtistAsync(artist.Id))">🗑️</button>
                                 <button>✏️</button>
                             </div>
                         </div>
                     </li>
                 }
             </ul>
+            <Dialog Title="Add New Artist" Opened="_showAddDialog" CloseButtonClicked="@(() => _showAddDialog = false)">
+                <BodyContent>
+                    <EditForm Model="NewArtist" OnSubmit="AddArtistAsync" FormName="AddArtistForm">
+                        <label >Name: </label>
+                        <InputText @bind-Value="NewArtist.Name" class="form-control"></InputText>
+                        <label>Genre: </label>
+                        <InputText @bind-Value="NewArtist.Genre" class="form-control"></InputText>
+                        <label>Image: </label>
+                        <InputText @bind-Value="NewArtist.Image" class="form-control"></InputText>
+                    
+                        <button class="btn btn-primary">Add Band</button>
+                    </EditForm>
+                </BodyContent>
+            </Dialog>
+            
+            // TODO: Do the update functionality, validations on filed using annotations, filtering and ordering and maybe make
+            // a new table for genre
+            <Dialog Title="Edit Artist" Opened="_showUpdateDialog" CloseButtonClicked="@(() => _showUpdateDialog = false)">
+                <BodyContent>
+                    <EditForm Model="UpdatedArtist" OnSubmit="AddArtistAsync" FormName="UpdateArtistForm">
+                        <label >New Name: </label>
+                        <InputText  @bind-Value="UpdatedArtist.Name" class="form-control"></InputText>
+                        <label>New Genre: </label>
+                        <InputText @bind-Value="UpdatedArtist.Genre" class="form-control"></InputText>
+                        <label>New Image: </label>
+                        <InputText @bind-Value="UpdatedArtist.Image" class="form-control"></InputText>
+                    
+                        <button class="btn btn-primary">Update Band</button>
+                    </EditForm>
+                </BodyContent>
+            </Dialog>
         }
     </div>
 </div>
@@ -49,9 +73,14 @@
 
 
 @code {
+    private bool _showAddDialog = false;
+    private bool _showUpdateDialog = false;
     private IList<ArtistGetDto> _artists = new List<ArtistGetDto>();
     [SupplyParameterFromForm]
     private ArtistCreateDto NewArtist { get; set; } = new();
+
+    [SupplyParameterFromForm] 
+    private ArtistCreateDto UpdatedArtist { get; set; } = new();
 
     private readonly string[] _stickyNotesColor =
     [
@@ -75,18 +104,34 @@
         _artists = await ArtistService.GetAllArtistsAsync();
     }
 
-    private async Task AddArtist()
+    private async Task AddArtistAsync()
     {
         await ArtistService.AddArtistAsync(NewArtist);
         NewArtist = new ArtistCreateDto();
         _artists = await ArtistService.GetAllArtistsAsync();
     }
 
-    private async Task DeleteArtist(int id)
+    private async Task DeleteArtistAsync(int id)
     {
-        Console.WriteLine($"Delete method called with id: {id}");
         await ArtistService.DeleteArtistAsync(id);
         _artists = await ArtistService.GetAllArtistsAsync();
 
+    }
+
+    private void ShowAddDialog()
+    {
+        _showAddDialog = true;
+    }
+    
+    private void ShowUpdateDialog()
+    {
+        _showUpdateDialog = true;
+    }
+
+    private async Task UpdateArtistAsync(int id)
+    {
+        await ArtistService.UpdateArtistAsync(id, UpdatedArtist);
+        UpdatedArtist = new ArtistCreateDto();
+        _artists = await ArtistService.GetAllArtistsAsync();
     }
 }

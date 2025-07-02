@@ -26,7 +26,7 @@ p {
 ul, li {
     list-style: none;
     padding: 0;
-    margin: 5% 0 0;
+    margin: 0 0 0;
 }
 
 ul {
@@ -87,3 +87,32 @@ ul li button {
     width: 2em;
     height: 2em;
 }
+
+button.round {
+    background-color: #6bcf7f;
+    color: white;
+    border: none;
+    padding: 5px;
+    font-size: 31px;
+    height: 70px;
+    width: 70px;
+    box-shadow: 0 2px 4px black;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button.round:hover {
+    background-color: #65b9e6;
+}
+
+button.round:active {
+    box-shadow: 0 0 2px darkslategray;
+    transform: translateY(2px);
+}
+
+.add-container button.round {
+    margin: 2rem;
+}
+
+

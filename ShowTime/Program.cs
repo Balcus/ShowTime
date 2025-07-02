@@ -14,13 +14,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ShowTimeDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// builder.Services.AddTransient<IUserRepository, UserRepository>();
-// builder.Services.AddTransient<IFestivalRepository, FestivalRepository>();
+// builder.Services.AddTransient<IRepository<User>, UserRepository>();
+builder.Services.AddTransient<IRepository<Festival>, FestivalRepository>();
 builder.Services.AddTransient<IRepository<Artist>, BaseRepository<Artist>>();
 // builder.Services.AddTransient<IRepository<Lineup>, BaseRepository<Lineup>>();
 // builder.Services.AddTransient<IRepository<Booking>, BaseRepository<Booking>>();
 
 builder.Services.AddTransient<IArtistService, ArtistService>();
+builder.Services.AddTransient<IFestivalService, FestivalService>();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
