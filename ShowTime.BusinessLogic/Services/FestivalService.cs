@@ -8,12 +8,12 @@ namespace ShowTime.BusinessLogic.Services;
 
 public class FestivalService(IFestivalRepository festivalRepository) : IFestivalService
 {
-    public async Task<List<FullFestivalGetDto>> GetAllFestivalsFullAsync()
+    public async Task<List<FullFestivalDto>> GetAllFestivalsFullAsync()
     {
         try
         {
             var festivals = await festivalRepository.GetAllAsync();
-            return festivals.Select(f => new FullFestivalGetDto
+            return festivals.Select(f => new FullFestivalDto
             {
                 Id = f.Id,
                 Name = f.Name,

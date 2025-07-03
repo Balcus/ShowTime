@@ -11,22 +11,25 @@
 <PageTitle>Festivals</PageTitle>
 
 <div class="festivals-container">
-    <div class="search-container">
+    <div class="control-container">
+        <div class="add-btn">
+            <button @onclick="(() => _showAddDialog = true)">📌</button>
+        </div>
         <div class="search-bar">
-            <input type="text" placeholder="SEARCH FESTIVALS..." class="search-input" />
-            <button class="search-button">🔍</button>
+            <SearchBox Items="_festivals" OnSearch="UpdateFilteredFestivals" />
         </div>
     </div>
 
     <div class="festivals-stack">
-        @foreach (var festival in _festivals)
+        @foreach (var festival in _filteredFestivals)
         {
             <div class="festival-card">
                 
                 <div class="card-actions">
                     <button class="action-btn view-btn">👁️</button>
-                    <button class="action-btn edit-btn">✏️</button>
-                    <button class="action-btn remove-btn">🗑️</button>
+                    <button class="action-btn edit-btn" @onclick="(() => ShowUpdateDialog(festival))">✏️</button>
+                    <button class="action-btn remove-btn" @onclick="(async () => await DeleteFestivalAsync(festival.Id))">🗑️</button>
+                    <button class="action-btn add-band-btn">🎸</button>
                 </div>
 
                 <div class="festival-content">
@@ -39,14 +42,14 @@
                     <div class="festival-info">
                         <div class="festival-header">
                             <h2 class="festival-name">@festival.Name</h2>
-
+                            
                             <div class="festival-meta">
                                 <span class="location-badge">📍 @festival.Location</span>
                                 <span class="date-badge">📅 @festival.StartDate.ToString("MMM dd") - @festival.EndDate.ToString("MMM dd")</span>
                                 <span class="capacity-badge">👥 @festival.Capacity</span>
                             </div>
                         </div>
-
+                        
                         <div class="artists-section">
                             <div class="artists-grid">
                                 @foreach (var artist in festival.Artists.Take(6))
@@ -73,13 +76,131 @@
             </div>
         }
     </div>
+    
+    <Dialog Title="Add New Festival" Opened="_showAddDialog" CloseButtonClicked="@(() => _showAddDialog = false)">
+        <BodyContent>
+            <div class="sticky-form">
+                <EditForm Model="NewFestival" OnValidSubmit="(async () => await AddFestivalAsync())" FormName="AddFestivalForm">
+                    <DataAnnotationsValidator />
+                    <label>Name:</label>
+                    <InputText @bind-Value="NewFestival.Name" class="form-control"/>
+                    <label>Splash Art:</label>
+                    <InputText @bind-Value="NewFestival.SplashArt" class="form-control"/>
+                    <label>Start Date:</label>
+                    <InputDate @bind-Value="NewFestival.StartDate" class="form-control" min="@DateTime.Now.ToString("yyyy MMMM dd")"/>
+                    <label>End Date:</label>
+                    <InputDate @bind-Value="NewFestival.EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy MMMM dd")"/>
+                    <label>Capacity:</label>
+                    <InputNumber @bind-Value="NewFestival.Capacity" class="form-control"/>
+                    <label>Location:</label>
+                    <InputText @bind-Value="NewFestival.Location" class="form-control"/>
+                    <button class="btn">Add Festival</button>
+                </EditForm>
+            </div>
+        </BodyContent>
+    </Dialog>
+    
+    <Dialog Title="Update Festival" Opened="_showUpdateDialog" CloseButtonClicked="@(() => _showUpdateDialog = false)">
+        <BodyContent>
+            <div class="sticky-form">
+                <EditForm Model="UpdatedFestival" OnValidSubmit="(async () => await UpdatedFestivalAsync())" FormName="UpdateFestivalForm">
+                    <DataAnnotationsValidator />
+                    <label>New Name:</label>
+                    <InputText @bind-Value="UpdatedFestival.Name" class="form-control"/>
+                    <label>New Splash Art:</label>
+                    <InputText @bind-Value="UpdatedFestival.SplashArt" class="form-control"/>
+                    <label>New Start Date:</label>
+                    <InputDate @bind-Value="UpdatedFestival.StartDate" class="form-control" min="@DateTime.Now.ToString("yyyy MMMM dd")"/>
+                    <label>New End Date:</label>
+                    <InputDate @bind-Value="UpdatedFestival.EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy MMMM dd")"/>
+                    <label>New Capacity:</label>
+                    <InputNumber @bind-Value="UpdatedFestival.Capacity" class="form-control"/>
+                    <label>New Location:</label>
+                    <InputText @bind-Value="UpdatedFestival.Location" class="form-control"/>
+                    <button class="btn">Update Festival</button>
+                </EditForm>
+            </div>
+        </BodyContent>
+    </Dialog>
 </div>
 
 @code {
-    private IList<FullFestivalGetDto> _festivals = new List<FullFestivalGetDto>();
+    private bool _showAddDialog = false;
+    private bool _showUpdateDialog = false;
+
+    private FestivalCreateDto UpdatedFestival { get; set; } = new();
+    private int _updateFestivalId;
     
+    private List<FullFestivalDto> _festivals = new();
+    private List<FullFestivalDto> _filteredFestivals = new();
+    [SupplyParameterFromForm] private FestivalCreateDto NewFestival { get; set; } = new ();
+
     protected override async Task OnInitializedAsync()
     {
         _festivals = await FestivalService.GetAllFestivalsFullAsync();
+        _filteredFestivals = _festivals;
     }
+
+    private async Task DeleteFestivalAsync(int festivalId)
+    {
+        await FestivalService.DeleteFestivalAsync(festivalId);
+        _festivals = await FestivalService.GetAllFestivalsFullAsync();
+    }
+
+    private async Task AddFestivalAsync()
+    {
+        await FestivalService.AddFestivalAsync(NewFestival);
+        _festivals = await FestivalService.GetAllFestivalsFullAsync();
+        _filteredFestivals = _festivals;
+        NewFestival = new FestivalCreateDto();
+        _showAddDialog = false;
+    }
+
+    void UpdateFilteredFestivals(string? searchTerm)
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            _filteredFestivals = _festivals;
+        }
+        else
+        {
+            _filteredFestivals = _festivals.Where(
+                f => f.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                f.Artists.Any(a => a.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                f.Location.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+    }
+
+    private async Task UpdatedFestivalAsync()
+    {
+        await FestivalService.UpdateFestivalAsync(_updateFestivalId,new FestivalCreateDto()
+        {
+            Capacity = UpdatedFestival.Capacity,
+            EndDate = UpdatedFestival.EndDate,
+            StartDate = UpdatedFestival.StartDate,
+            Location = UpdatedFestival.Location,
+            Name = UpdatedFestival.Name,
+            SplashArt = UpdatedFestival.SplashArt
+        });
+        _festivals = await FestivalService.GetAllFestivalsFullAsync();
+        _filteredFestivals = _festivals;
+        _showUpdateDialog = false;
+    }
+
+    private void ShowUpdateDialog(FullFestivalDto updatedFestival)
+    {
+        _updateFestivalId = updatedFestival.Id;
+        UpdatedFestival = new FestivalCreateDto()
+        {
+            Name = updatedFestival.Name,
+            Capacity = updatedFestival.Capacity,
+            Location = updatedFestival.Location,
+            StartDate = updatedFestival.StartDate,
+            EndDate = updatedFestival.EndDate,
+            SplashArt = updatedFestival.SplashArt
+        };
+        _showUpdateDialog = true;
+    }
+
 }

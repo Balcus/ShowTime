@@ -1,0 +1,36 @@
+.search-input {
+    flex: 1;
+    padding: 1.2rem 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    font-family: 'Arial Black', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #000;
+    min-height: 56px;
+}
+
+.search-button {
+    padding: 1.2rem 1.5rem;
+    background: #5fd4ba;
+    color: #fff;
+    border: none;
+    border-left: 4px solid #000;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 56px;
+}
+
+.search-input::placeholder {
+    color: #666;
+    opacity: 0.7;
+}
+
+.search-button:hover {
+    background: #ff6b6b;
+    transform: scale(1.1);
+}

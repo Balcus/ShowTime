@@ -3,7 +3,7 @@ using ShowTime.BusinessLogic.Dto.LineupDto;
 
 namespace ShowTime.BusinessLogic.Dto.FestivalDto;
 
-public class FullFestivalGetDto
+public class FullFestivalDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;

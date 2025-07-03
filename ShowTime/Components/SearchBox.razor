@@ -1,0 +1,17 @@
+@typeparam TEntity
+
+<input @bind="_searchItem" type="text" placeholder="SEARCH FESTIVALS..." class="search-input"/>
+<button class="search-button" @onclick="OnSearchClicked">🔍</button>
+
+@code {
+    [Parameter]
+    public required List<TEntity> Items { get; set; }
+    [Parameter]
+    public EventCallback<string?> OnSearch { get; set; }
+    private string? _searchItem;
+
+    private async Task OnSearchClicked()
+    {
+        await OnSearch.InvokeAsync(_searchItem);
+    }
+}
