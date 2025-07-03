@@ -12,7 +12,8 @@ public interface IFestivalService
     Task AddFestivalAsync(FestivalCreateDto festivalCreateDto);
     Task UpdateFestivalAsync(int id, FestivalCreateDto festivalCreateDto);
     Task DeleteFestivalAsync(int id);
-    Task<List<LineupGetDto>?> GetLineupsForFestival(int festivalId);
+    Task<List<LineupGetDto>> GetLineupsForFestivalAsync(int festivalId);
+    Task<List<ArtistGetDto>> GetArtistsForFestivalAsync(int festivalId);
     Task<List<FullFestivalDto>> GetAllFestivalsFullAsync();
     Task UpdateFestivalArtistsAsync(int festivalId, List<ArtistGetDto> updatedArtists);
 }

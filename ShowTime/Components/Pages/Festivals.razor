@@ -4,11 +4,11 @@
 @using ShowTime.BusinessLogic.Dto.FestivalDto
 @inject IFestivalService FestivalService
 @inject IArtistService ArtistService
+@inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-@* TODO: CRUD on Festivals, use validation, make the search-bar part of the navbar and make it *@
-@* behave differently depending on the page, figure out how u want to add bands and lineups ,*@
-@* maybe a new table for genre (A LOT)  :) *@
+@* TODO: Write the add and delete functionality for lineups, think a bit about incorporating the search bar inside nav *@
+@* Maybe a special table for genre would be nice to have *@
 
 <PageTitle>Festivals</PageTitle>
 
@@ -28,7 +28,7 @@
             <div class="festival-card">
                 
                 <div class="card-actions">
-                    <button class="action-btn view-btn">👁️</button>
+                    <button class="action-btn view-btn" @onclick="(() => ViewFestival(festival.Id))">👁️</button>
                     <button class="action-btn edit-btn" @onclick="(() => ShowUpdateDialog(festival))">✏️</button>
                     <button class="action-btn remove-btn" @onclick="(async () => await DeleteFestivalAsync(festival.Id))">🗑️</button>
                     <button class="action-btn add-band-btn" @onclick="(() => ShowUpdateArtistsDialog(festival))">🎸</button>
@@ -54,7 +54,7 @@
                         
                         <div class="artists-section">
                             <div class="artists-grid">
-                                @foreach (var artist in festival.Artists.Take(6))
+                                @foreach (var artist in festival.Artists.Take(5))
                                 {
                                     <div class="artist-badge">
                                         @if (!string.IsNullOrEmpty(artist.Image))
@@ -64,10 +64,10 @@
                                         <span class="artist-name">@artist.Name</span>
                                     </div>
                                 }
-                                @if (festival.Artists.Count > 6)
+                                @if (festival.Artists.Count > 5)
                                 {
                                     <div class="artist-badge more-artists">
-                                        <span class="more-count">+@(festival.Artists.Count - 6)</span>
+                                        <span class="more-count">+@(festival.Artists.Count - 5)</span>
                                         <span class="more-text">MORE</span>
                                     </div>
                                 }
@@ -140,7 +140,7 @@
                         </div>
                     }
                 </div>
-                <button class="btn">Update Artists</button>
+                <button class="update-artist-btn">Update Artists</button>
             </EditForm>
         </BodyContent>
     </Dialog>
@@ -173,6 +173,12 @@
     private int _festivalEditArtistsId;
     
     private List<SelectableArtist> _allArtists = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _festivals = await FestivalService.GetAllFestivalsFullAsync();
+        _filteredFestivals = _festivals;
+    }
     
     private async Task UpdateFestivalArtistsAsync()
     {
@@ -213,13 +219,6 @@
         }).ToList();
 
         _showUpdateArtistsDialog = true;
-    }
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        _festivals = await FestivalService.GetAllFestivalsFullAsync();
-        _filteredFestivals = _festivals;
     }
 
     private async Task DeleteFestivalAsync(int festivalId)
@@ -282,5 +281,10 @@
             SplashArt = updatedFestival.SplashArt
         };
         _showUpdateDialog = true;
+    }
+
+    private void ViewFestival(int festivalId)
+    {
+        Navigation.NavigateTo($"/festivals/{festivalId}");
     }
 }

@@ -1,0 +1,133 @@
+@page "/festivals/{festivalId}"
+@inject IFestivalService FestivalService
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.ArtistDto
+@using ShowTime.BusinessLogic.Dto.LineupDto
+
+<PageTitle>Festival lineup</PageTitle>
+
+<div class="lineup-container">
+    <div class="lineup-header">
+        <h1 class="lineup-title">Festival Lineup</h1>
+    </div>
+
+    @if (ValidLineups.Any())
+    {
+        @foreach (var dayGroup in GroupedLineups)
+        {
+            <div class="day-section">
+                <h2 class="day-title">@dayGroup.Key.ToString("dddd, MMMM dd, yyyy")</h2>
+                
+                <div class="timetable-container">
+                    @foreach (var stage in GetStagesForDay(dayGroup.Value))
+                    {
+                        <div class="stage-row">
+                            <div class="stage-label">@stage</div>
+                            @foreach (var hour in GetHoursForDay(dayGroup.Value))
+                            {
+                                <div class="time-slot">
+                                    @{
+                                        var artistsInSlot = GetArtistsForTimeSlot(dayGroup.Value, stage, hour);
+                                    }
+                                    @foreach (var artistInfo in artistsInSlot)
+                                    {
+                                        <div class="artist-slot">
+                                            <div class="artist-image-container">
+                                                @if (!string.IsNullOrEmpty(artistInfo.Artist.Image))
+                                                {
+                                                    <img src="@artistInfo.Artist.Image" alt="@artistInfo.Artist.Name" class="artist-mini-image" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="artist-placeholder">🎤</div>
+                                                }
+                                            </div>
+                                            <div class="artist-slot-info">
+                                                <div class="artist-slot-name">@artistInfo.Artist.Name</div>
+                                                <div class="artist-slot-time">@artistInfo.Lineup.StartTime.ToString("HH:mm")</div>
+                                                @if (!string.IsNullOrEmpty(artistInfo.Artist.Genre))
+                                                {
+                                                    <div class="artist-slot-genre">@artistInfo.Artist.Genre</div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="no-lineup-message">
+            <h2>No Lineup Available</h2>
+            <p>This festival doesn't have any scheduled performances</p>
+        </div>
+    }
+</div>
+
+@code {
+    private List<LineupGetDto> Lineups { get; set; } = new();
+    private List<ArtistGetDto> Artists { get; set; } = new();
+    [Parameter] public required string FestivalId { get; set; }
+
+    private List<LineupGetDto> ValidLineups => Lineups.Where(l => l.StartTime != default(DateTime)).ToList();
+    private List<LineupGetDto> InvalidLineups => Lineups.Where(l => l.StartTime == default(DateTime)).ToList();
+
+    private Dictionary<DateTime, List<LineupGetDto>> GroupedLineups => 
+        ValidLineups.GroupBy(l => l.StartTime.Date)
+                   .ToDictionary(g => g.Key, g => g.ToList());
+
+    protected override async Task OnInitializedAsync()
+    {
+        Lineups = await FestivalService.GetLineupsForFestivalAsync(int.Parse(FestivalId));
+        Artists = await FestivalService.GetArtistsForFestivalAsync(int.Parse(FestivalId));
+    }
+
+    private static List<int> GetHoursForDay(List<LineupGetDto> dayLineups)
+    {
+        var hours = dayLineups.Select(l => l.StartTime.Hour).Distinct().OrderBy(h => h).ToList();
+        if (!hours.Any()) return [];
+        
+        var minHour = hours.Min();
+        var maxHour = hours.Max();
+        var allHours = new List<int>();
+        
+        for (var hour = minHour; hour <= maxHour; hour++)
+        {
+            allHours.Add(hour);
+        }
+        
+        return allHours;
+    }
+
+    private static List<string> GetStagesForDay(List<LineupGetDto> dayLineups)
+    {
+        return dayLineups.Select(l => l.Stage).Distinct().OrderBy(s => s).ToList();
+    }
+
+    private List<(LineupGetDto Lineup, ArtistGetDto Artist)> GetArtistsForTimeSlot(List<LineupGetDto> dayLineups, string stage, int hour)
+    {
+        var lineupsInSlot = dayLineups.Where(l => l.Stage == stage && l.StartTime.Hour == hour).ToList();
+        var result = new List<(LineupGetDto, ArtistGetDto)>();
+        
+        foreach (var lineup in lineupsInSlot)
+        {
+            var artist = GetArtistById(lineup.ArtistId);
+            if (artist != null)
+            {
+                result.Add((lineup, artist));
+            }
+        }
+        
+        return result;
+    }
+
+    private ArtistGetDto? GetArtistById(int artistId)
+    {
+        return Artists.FirstOrDefault(a => a.Id == artistId);
+    }
+}

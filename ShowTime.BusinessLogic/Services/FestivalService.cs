@@ -158,12 +158,18 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
         }
     }
 
-    public async Task<List<LineupGetDto>?> GetLineupsForFestival(int festivalId)
+    public async Task<List<LineupGetDto>> GetLineupsForFestivalAsync(int festivalId)
     {
         try
         {
             var festival = await festivalRepository.GetByIdAsync(festivalId);
-            return festival?.Lineups.Select(l => new LineupGetDto
+            
+            if (festival == null)
+            {
+                throw new Exception($"Festival with id {festivalId} not found while trying to get festival lineups");   
+            }
+            
+            return festival.Lineups.Select(l => new LineupGetDto
             {
                 FestivalId = festival.Id,
                 ArtistId = l.ArtistId,
@@ -175,6 +181,31 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
         catch (Exception e)
         {
             throw new Exception($"Error while trying to return lineups for festival with id {festivalId}: {e.Message}");
+        }
+    }
+
+    public async Task<List<ArtistGetDto>> GetArtistsForFestivalAsync(int festivalId)
+    {
+        try
+        {
+            var festival = await festivalRepository.GetByIdAsync(festivalId);
+
+            if (festival == null)
+            {
+                throw new Exception($"Festival with id {festivalId} not found while trying to get festival artists");
+            }
+            
+            return festival.Artists.Select(a => new ArtistGetDto()
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Genre = a.Genre,
+                Image = a.Image,
+            }).Distinct().ToList();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error while trying to retire artists for festival with id {festivalId}: {e.Message}");
         }
     }
 }
