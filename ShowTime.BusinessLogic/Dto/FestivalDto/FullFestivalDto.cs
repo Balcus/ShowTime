@@ -13,5 +13,5 @@ public class FullFestivalDto
     public string SplashArt { get; set; } = string.Empty;
     public int Capacity { get; set; }
     public IList<LineupGetDto> Lineups { get; set; } = new List<LineupGetDto>();
-    public IList<FestivalArtistGetDto> Artists { get; set; } = new List<FestivalArtistGetDto>();
+    public IList<ArtistGetDto> Artists { get; set; } = new List<ArtistGetDto>();
 }

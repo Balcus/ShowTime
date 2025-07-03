@@ -1,7 +1,9 @@
 @page "/festivals"
 @using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.ArtistDto
 @using ShowTime.BusinessLogic.Dto.FestivalDto
 @inject IFestivalService FestivalService
+@inject IArtistService ArtistService
 @rendermode InteractiveServer
 
 @* TODO: CRUD on Festivals, use validation, make the search-bar part of the navbar and make it *@
@@ -29,7 +31,7 @@
                     <button class="action-btn view-btn">👁️</button>
                     <button class="action-btn edit-btn" @onclick="(() => ShowUpdateDialog(festival))">✏️</button>
                     <button class="action-btn remove-btn" @onclick="(async () => await DeleteFestivalAsync(festival.Id))">🗑️</button>
-                    <button class="action-btn add-band-btn">🎸</button>
+                    <button class="action-btn add-band-btn" @onclick="(() => ShowUpdateArtistsDialog(festival))">🎸</button>
                 </div>
 
                 <div class="festival-content">
@@ -122,11 +124,43 @@
             </div>
         </BodyContent>
     </Dialog>
+    
+    <Dialog Title="Update Festival Artists" Opened="_showUpdateArtistsDialog" CloseButtonClicked="@(() => _showUpdateArtistsDialog = false)">
+        <BodyContent>
+            <EditForm Model="_allArtists" OnValidSubmit="UpdateFestivalArtistsAsync">
+                <div class="artist-list">
+                    @foreach (var artist in _allArtists)
+                    {
+                        <div>
+                            <input type="checkbox"
+                                   @bind="artist.IsSelected"
+                                   class="form-check-input"
+                                   id="artist-@artist.Id" />
+                            <label for="artist-@artist.Id">@artist.Name</label>
+                        </div>
+                    }
+                </div>
+                <button class="btn">Update Artists</button>
+            </EditForm>
+        </BodyContent>
+    </Dialog>
+
 </div>
 
 @code {
+    private class SelectableArtist
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Image { get; set; }
+        public string? Genre { get; set; }
+        public bool IsSelected { get; set; }
+    }
+
+    
     private bool _showAddDialog = false;
     private bool _showUpdateDialog = false;
+    private bool _showUpdateArtistsDialog = false;
 
     private FestivalCreateDto UpdatedFestival { get; set; } = new();
     private int _updateFestivalId;
@@ -134,6 +168,53 @@
     private List<FullFestivalDto> _festivals = new();
     private List<FullFestivalDto> _filteredFestivals = new();
     [SupplyParameterFromForm] private FestivalCreateDto NewFestival { get; set; } = new ();
+
+    private List<ArtistGetDto> _festivalUpdatedArtists = new();
+    private int _festivalEditArtistsId;
+    
+    private List<SelectableArtist> _allArtists = new();
+    
+    private async Task UpdateFestivalArtistsAsync()
+    {
+        var selectedArtists = _allArtists
+            .Where(a => a.IsSelected)
+            .Select(a => new ArtistGetDto
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Genre = a.Genre,
+                Image = a.Image
+            }).ToList();
+
+        await FestivalService.UpdateFestivalArtistsAsync(_festivalEditArtistsId, selectedArtists);
+
+        _festivals = await FestivalService.GetAllFestivalsFullAsync();
+        _filteredFestivals = _festivals;
+
+        _showUpdateArtistsDialog = false;
+    }
+
+
+    private async Task ShowUpdateArtistsDialog(FullFestivalDto festival)
+    {
+        _festivalEditArtistsId = festival.Id;
+
+        var allArtists = await ArtistService.GetAllArtistsAsync();
+
+        var selectedIds = festival.Artists.Select(a => a.Id).ToHashSet();
+
+        _allArtists = allArtists.Select(a => new SelectableArtist
+        {
+            Id = a.Id,
+            Name = a.Name,
+            Image = a.Image,
+            Genre = a.Genre,
+            IsSelected = selectedIds.Contains(a.Id)
+        }).ToList();
+
+        _showUpdateArtistsDialog = true;
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -202,5 +283,4 @@
         };
         _showUpdateDialog = true;
     }
-
 }

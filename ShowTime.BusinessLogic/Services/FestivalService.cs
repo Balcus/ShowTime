@@ -1,4 +1,5 @@
 using ShowTime.BusinessLogic.Abstractions;
+using ShowTime.BusinessLogic.Dto.ArtistDto;
 using ShowTime.BusinessLogic.Dto.FestivalDto;
 using ShowTime.BusinessLogic.Dto.LineupDto;
 using ShowTime.DataAccess.Models;
@@ -22,10 +23,12 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
                 StartDate = f.StartDate,
                 Location = f.Location,
                 SplashArt = f.SplashArt,
-                Artists = f.Artists.Select(a => new FestivalArtistGetDto
+                Artists = f.Artists.Select(a => new ArtistGetDto
                 {
+                    Id = a.Id,
                     Name = a.Name,
                     Image = a.Image,
+                    Genre = a.Genre,
                 }).ToList(),
                 Lineups = f.Lineups.Select(l => new LineupGetDto{
                     FestivalId = l.FestivalId,
@@ -41,7 +44,20 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
             throw new Exception($"An error occured while retrieving all festivals : {e.Message}");
         }
     }
-    
+
+    public async Task UpdateFestivalArtistsAsync(int id, List<ArtistGetDto> updatedArtists)
+    {
+        List<Artist> newArtists = updatedArtists
+            .Select(artist => new Artist {
+                Id = artist.Id,
+                Name = artist.Name,
+                Image = artist.Image,
+                Genre = artist.Genre,
+            }).ToList();
+
+        await festivalRepository.UpdateFestivalArtists(id, newArtists);
+    }
+
     public async Task<IList<FestivalGetDto>> GetAllFestivalsAsync()
     {
         try
@@ -147,8 +163,7 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
         try
         {
             var festival = await festivalRepository.GetByIdAsync(festivalId);
-            if (festival == null) return null;
-            return festival.Lineups.Select(l => new LineupGetDto
+            return festival?.Lineups.Select(l => new LineupGetDto
             {
                 FestivalId = festival.Id,
                 ArtistId = l.ArtistId,

@@ -1,5 +1,7 @@
+using ShowTime.BusinessLogic.Dto.ArtistDto;
 using ShowTime.BusinessLogic.Dto.FestivalDto;
 using ShowTime.BusinessLogic.Dto.LineupDto;
+using ShowTime.DataAccess.Models;
 
 namespace ShowTime.BusinessLogic.Abstractions;
 
@@ -12,4 +14,5 @@ public interface IFestivalService
     Task DeleteFestivalAsync(int id);
     Task<List<LineupGetDto>?> GetLineupsForFestival(int festivalId);
     Task<List<FullFestivalDto>> GetAllFestivalsFullAsync();
+    Task UpdateFestivalArtistsAsync(int festivalId, List<ArtistGetDto> updatedArtists);
 }
