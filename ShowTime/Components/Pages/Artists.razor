@@ -1,9 +1,12 @@
 @page "/artists"
+@using Microsoft.AspNetCore.Authorization
 @using ShowTime.BusinessLogic.Abstractions
 @using ShowTime.BusinessLogic.Dto.ArtistDto
 @inject IArtistService ArtistService;
 @rendermode InteractiveServer
-@using System.ComponentModel.DataAnnotations;
+@* forbid a full page *@
+@* @attribute [StreamRendering] *@
+@* @attribute [Authorize(Roles = "Admin")] *@
 <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet">
 
 <PageTitle>Artists</PageTitle>

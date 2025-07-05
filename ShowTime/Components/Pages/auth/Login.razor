@@ -1,0 +1,63 @@
+@page "/login"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.UserDto
+@using ShowTime.DataAccess.Enums
+@inject NavigationManager NavigationManager
+@inject IUserService UserService
+@inject IHttpContextAccessor HttpContextAccessor
+@* @rendermode InteractiveServer *@
+
+<PageTitle>Login</PageTitle>
+
+<h3>Login</h3>
+<EditForm Model="LoginInfo" OnValidSubmit="Authenticate" FormName="LoginForm">
+    <DataAnnotationsValidator />
+    <label>Email:</label>
+    @* <ValidationMessage For="()"></ValidationMessage> *@
+    <InputText @bind-Value="LoginInfo.Email" class="form-control"/>
+    <label>Password:</label>
+    <InputText @bind-Value="LoginInfo.Password" class="form-control"/>
+    <button class="btn">Login</button>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm] private LoginDto LoginInfo { get; set; } = new();
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = null!;
+
+    private async Task Authenticate()
+    {
+        try
+        {
+            var response = await UserService.LoginAsync(LoginInfo);
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.Email, LoginInfo.Email),
+                new(ClaimTypes.Role, Enum.GetName(typeof(UserRole), response.Role) ?? nameof(UserRole.User))
+            };
+
+            var claimIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
+
+            var httpContext = HttpContextAccessor.HttpContext;
+            if (httpContext != null)
+            {
+                await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+                HttpContext.Response.Redirect("/");
+            }
+            else
+            {
+                throw new Exception($"Http context is null!");
+            }
+        }
+        catch (Exception e)
+        {
+            // handle
+            Console.WriteLine($"Login failed: {e.Message}");
+        }
+    }
+}

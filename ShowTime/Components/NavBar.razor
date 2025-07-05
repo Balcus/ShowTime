@@ -1,18 +1,20 @@
 <nav class="navbar">
-    <div class="navbar-left">
-        <a href="/artists" class="nav-link">Artists</a>
-        <a href="/festivals" class="nav-link">Festivals</a>
-        <a href="/" class="nav-link">Home</a>
-    </div>
-    
+    <AuthorizeView Roles="Admin">
+        <div class="navbar-left">
+            <a href="/artists" class="nav-link">Artists</a>
+            <a href="/festivals" class="nav-link">Festivals</a>
+            <a href="/" class="nav-link">Home</a>
+        </div>
+    </AuthorizeView>
+
     <div class="navbar-center">
         <h1 class="logo">SHOW • TIME</h1>
     </div>
-    
+
     <div class="navbar-right">
-        <a href="#" class="user-profile-button-link">
+        <a href="/register" class="user-profile-button-link">
             <button class="user-profile-button">
-                👤 USER PROFILE
+                👤 REGISTER
             </button>
         </a>
     </div>

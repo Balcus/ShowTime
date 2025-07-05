@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using ShowTime.BusinessLogic.Abstractions;
 using ShowTime.BusinessLogic.Services;
@@ -12,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ShowTimeDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddTransient<IRepository<User>, UserRepository>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IFestivalRepository, FestivalRepository>();
 builder.Services.AddTransient<IRepository<Artist>, BaseRepository<Artist>>();
 builder.Services.AddTransient<IRepository<Lineup>, BaseRepository<Lineup>>();
@@ -20,9 +21,24 @@ builder.Services.AddTransient<IRepository<Booking>, BaseRepository<Booking>>();
 
 builder.Services.AddTransient<IArtistService, ArtistService>();
 builder.Services.AddTransient<IFestivalService, FestivalService>();
+builder.Services.AddTransient<IUserService, UserService>();
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "auth-token";
+        options.LoginPath = "/login";
+        options.AccessDeniedPath = "/access-denied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(2);
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
@@ -36,6 +52,8 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

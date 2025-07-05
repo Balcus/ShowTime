@@ -4,7 +4,11 @@
     <div class="navbar-container">
         <NavBar />
     </div>
-
+    <AuthorizeView>
+        <NotAuthorized><a href="/login">Login</a></NotAuthorized>
+        <Authorized><a href="/logout">Logout</a></Authorized>
+    </AuthorizeView>
+    
     <main>
         <article>
             @Body
