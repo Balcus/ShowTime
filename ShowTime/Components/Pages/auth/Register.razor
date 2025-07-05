@@ -1,6 +1,4 @@
 @page "/register"
-@using System.Security.Cryptography
-@using Microsoft.AspNetCore.Cryptography.KeyDerivation
 @using ShowTime.BusinessLogic.Abstractions
 @using ShowTime.BusinessLogic.Dto.UserDto
 @inject IUserService UserService
@@ -27,36 +25,23 @@
 
     protected override async Task OnInitializedAsync()
     {
-        
+
     }
 
     private void RegisterUser()
     {
-        var dbUser = new LoginDto()
+        var user = new LoginDto()
         {
             Email = RegisteredUser.Email,
-            Password = HashPassword(RegisteredUser.Password)
+            Password = RegisteredUser.Password
         };
-        UserService.CreateUserAsync(dbUser);
+        UserService.RegisterUserAsync(user);
         RegisteredUser = new();
     }
 
     private void GoBack()
     {
         Console.WriteLine("Should redirect to home-page");
-    }
-
-    private static string HashPassword(string password)
-    {
-        byte[] salt = RandomNumberGenerator.GetBytes(128 / 8);
-        string hashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-            password: password!,
-            salt: salt,
-            prf: KeyDerivationPrf.HMACSHA256,
-            iterationCount: 10000,
-            numBytesRequested: 256 / 8
-        ));
-        return hashedPassword;
     }
 
 }

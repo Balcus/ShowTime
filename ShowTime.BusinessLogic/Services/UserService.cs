@@ -1,6 +1,5 @@
 using ShowTime.BusinessLogic.Abstractions;
 using ShowTime.BusinessLogic.Dto.UserDto;
-using ShowTime.DataAccess.Enums;
 using ShowTime.DataAccess.Models;
 using ShowTime.DataAccess.Repositories.Interfaces;
 
@@ -8,7 +7,7 @@ namespace ShowTime.BusinessLogic.Services;
 // make an actual login/register component
 public class UserService(IUserRepository userRepository) : IUserService
 {
-    public async Task CreateUserAsync(LoginDto userCreateDto)
+    public async Task RegisterUserAsync(LoginDto userCreateDto)
     {
         try
         {
@@ -17,7 +16,7 @@ public class UserService(IUserRepository userRepository) : IUserService
                 Email = userCreateDto.Email,
                 Password = userCreateDto.Password,
             };
-            await userRepository.CreateAsync(createUser);
+            await userRepository.RegisterUserAsync(createUser);
         }
         catch (Exception e)
         {
@@ -27,9 +26,18 @@ public class UserService(IUserRepository userRepository) : IUserService
 
     public async Task<LoginResponseDto> LoginAsync(LoginDto loginDto)
     {
-        return new LoginResponseDto()
+        try
         {
-            Role = UserRole.Admin,
-        };
+            var user = await userRepository.LoginAsync(loginDto.Email, loginDto.Password);
+            return new LoginResponseDto()
+            {
+                Role = user.Role,
+            };
+        }
+        catch (Exception e)
+        {
+            // todo
+            throw new Exception($"Error while trying to login: {e.Message}");
+        }
     }
 }
