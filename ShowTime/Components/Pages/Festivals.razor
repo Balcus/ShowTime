@@ -7,18 +7,17 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-@* TODO: Write the add and delete functionality for lineups, think a bit about incorporating the search bar inside nav *@
-@* Maybe a special table for genre would be nice to have *@
-
 <PageTitle>Festivals</PageTitle>
 
 <div class="festivals-container">
     <div class="control-container">
-        <div class="add-btn">
-            <button @onclick="(() => _showAddDialog = true)">📌</button>
-        </div>
+        <AuthorizeView Roles="Admin">
+            <div class="add-btn">
+                <button @onclick="(() => _showAddDialog = true)">📌</button>
+            </div>
+        </AuthorizeView>
         <div class="search-bar">
-            <SearchBox Items="_festivals" OnSearch="UpdateFilteredFestivals" />
+            <SearchBox Items="_festivals" OnSearch="UpdateFilteredFestivals"/>
         </div>
     </div>
 
@@ -29,9 +28,11 @@
                 
                 <div class="card-actions">
                     <button class="action-btn view-btn" @onclick="(() => ViewFestival(festival.Id))">👁️</button>
-                    <button class="action-btn edit-btn" @onclick="(() => ShowUpdateDialog(festival))">✏️</button>
-                    <button class="action-btn remove-btn" @onclick="(async () => await DeleteFestivalAsync(festival.Id))">🗑️</button>
-                    <button class="action-btn add-band-btn" @onclick="(() => ShowUpdateArtistsDialog(festival))">🎸</button>
+                    <AuthorizeView Roles="Admin">
+                        <button class="action-btn edit-btn" @onclick="(() => ShowUpdateDialog(festival))">✏️</button>
+                        <button class="action-btn remove-btn" @onclick="(async () => await DeleteFestivalAsync(festival.Id))">🗑️</button>
+                        <button class="action-btn add-band-btn" @onclick="(() => ShowUpdateArtistsDialog(festival))">🎸</button>
+                    </AuthorizeView>
                 </div>
 
                 <div class="festival-content">

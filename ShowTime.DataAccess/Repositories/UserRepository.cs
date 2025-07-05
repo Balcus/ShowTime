@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ShowTime.DataAccess.Exceptions;
 using ShowTime.DataAccess.Models;
 using ShowTime.DataAccess.Repositories.Interfaces;
 using ShowTime.DataAccess.Security;
@@ -26,34 +27,55 @@ public class UserRepository(ShowTimeDbContext context) : BaseRepository<User>(co
 
     public async Task<User> LoginAsync(string email, string providedPassword)
     {
-        var user = await Context
-            .Set<User>()
-            .FirstOrDefaultAsync(u => u.Email == email);
-
-        if (user == null)
+        try
         {
-            throw new Exception($"User with email {email} does not exist");
-        }
-        
-        var isSame = PasswordHasher.ComparePasswords(user.Password, providedPassword);
-        if (isSame)
-        {
-            return user;
-        }
+            var user = await Context
+                .Set<User>()
+                .FirstOrDefaultAsync(u => u.Email == email);
 
-        throw new Exception($"The provided password is not correct");
+            if (user == null)
+            {
+                throw new Exception($"User with email {email} does not exist");
+            }
+
+            var isSame = PasswordHasher.ComparePasswords(user.Password, providedPassword);
+            if (isSame)
+            {
+                return user;
+            }
+
+            throw new WrongPasswordError();
+        }
+        catch (WrongPasswordError e)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error trying to login user with email {email}: {e.Message}");
+        }
     }
 
     public async Task RegisterUserAsync(User user)
     {
         try
         {
+            var sameMailUser = await Context.Set<User>().Where(u => u.Email == user.Email).FirstOrDefaultAsync();
+            if (sameMailUser != null)
+            {
+                throw new UserAlreadyExistsException(user.Email);
+            }
+
             var passwordHash = PasswordHasher.HashPassword(user.Password);
             user.Password = passwordHash;
             await Context
                 .Set<User>()
                 .AddAsync(user);
             await Context.SaveChangesAsync();
+        }
+        catch (UserAlreadyExistsException e)
+        {
+            throw;
         }
         catch (Exception e)
         {

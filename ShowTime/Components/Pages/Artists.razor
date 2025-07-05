@@ -12,9 +12,11 @@
 <PageTitle>Artists</PageTitle>
 <div class="page">
     <div class="content">
-        <div class="add-container">
-            <button @onclick="ShowAddDialog" class="add">📌</button>
-        </div>
+        <AuthorizeView Roles="Admin">
+            <div class="add-container">
+                <button @onclick="ShowAddDialog" class="add">📌</button>
+            </div>
+        </AuthorizeView>
 
         @if (_artists.Count == 0)
         {
@@ -31,20 +33,23 @@
                             <img src="@artist.Image" alt="@artist.Name logo"/>
                             <h2>@artist.Name</h2>
                             <p>@artist.Genre</p>
-                            <div class="controls">
-                                <button @onclick="@(async () => await DeleteArtistAsync(artist.Id))">🗑️</button>
-                                <button @onclick="@(() => ShowUpdateDialog(artist))">✏️</button>
-                            </div>
+                            
+                            <AuthorizeView Roles="Admin">
+                                <div class="controls">
+                                    <button @onclick="@(async () => await DeleteArtistAsync(artist.Id))">🗑️</button>
+                                    <button @onclick="@(() => ShowUpdateDialog(artist))">✏️</button>
+                                </div>
+                            </AuthorizeView>
                         </div>
                     </li>
                 }
             </ul>
-            
+
             <Dialog Title="Add New Artist" Opened="_showAddDialog" CloseButtonClicked="@(() => _showAddDialog = false)">
                 <BodyContent>
                     <div class="sticky-form">
                         <EditForm Model="NewArtist" OnValidSubmit="AddArtistAsync" FormName="AddArtistForm">
-                            <DataAnnotationsValidator />
+                            <DataAnnotationsValidator/>
                             <label>Name:</label>
                             <InputText @bind-Value="NewArtist.Name" class="form-control"/>
                             <label>Genre:</label>
@@ -56,7 +61,7 @@
                     </div>
                 </BodyContent>
             </Dialog>
-            
+
             <Dialog Title="Update Artist" Opened="_showUpdateDialog" CloseButtonClicked="@(() => _showUpdateDialog = false)">
                 <BodyContent>
                     <div class="sticky-form">

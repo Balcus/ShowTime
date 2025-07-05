@@ -13,15 +13,17 @@
 
 main {
     flex: 1;
-    background-color: #ffffff;
+    background-color: #f0f8ff;
     border-right: 4px solid #000000;
     border-left: 4px solid #000000;
     border-bottom: 4px solid #000000;
+    margin: 0;
+    padding: 0;
 }
 
 .content {
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 0;
 }
 
 * {

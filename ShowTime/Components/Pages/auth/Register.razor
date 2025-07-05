@@ -1,47 +1,81 @@
 @page "/register"
 @using ShowTime.BusinessLogic.Abstractions
 @using ShowTime.BusinessLogic.Dto.UserDto
+@using ShowTime.DataAccess.Exceptions
 @inject IUserService UserService
+@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
-<Dialog Title="Register User" Opened="true" CloseButtonClicked="(() => GoBack())">
-    <BodyContent>
-        <div class="sticky-form">
-            <EditForm Model="RegisteredUser" OnValidSubmit="RegisterUser">
-                <DataAnnotationsValidator/>
-                <ValidationSummary/>
-                <label>Email :</label>
-                <InputText @bind-Value="RegisteredUser.Email" class="form-control"/>
-                <label>Password :</label>
-                <InputText type="password" @bind-Value="RegisteredUser.Password" class="form-control"/>
-                <button class="btn btn-primary">Register User</button>
-            </EditForm>
+<PageTitle>Register</PageTitle>
+
+<div class="page">
+    <div class="container">
+        <div class="wrapper">
+            <div class="form">
+                <h2 class="title">Sign Up</h2>
+                <p class="subtitle">Create your account now!</p>
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="alert alert-danger" style="color: red; margin-bottom: 20px; padding: 10px; border: 1px solid red; border-radius: 5px; background-color: #fee;">
+                        @ErrorMessage
+                    </div>
+                }
+
+                <EditForm Model="RegisteredUser" OnValidSubmit="RegisterUser">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <InputText @bind-Value="RegisteredUser.Email" class="form-control" @oninput="ClearErrorMessage" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <InputText type="password" @bind-Value="RegisteredUser.Password" class="form-control" @oninput="ClearErrorMessage" />
+                    </div>
+
+                    <button class="submit-btn">Register</button>
+                </EditForm>
+            </div>
+
+            <div class="image">
+                <img src="https://images.unsplash.com/photo-1520468164108-7f393c152c59?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Image" />
+            </div>
         </div>
-    </BodyContent>
-</Dialog>
+    </div>
+</div>
+
 
 @code {
     private LoginDto RegisteredUser { get; set; } = new();
+    private string ErrorMessage { get; set; } = string.Empty;
 
-    protected override async Task OnInitializedAsync()
+    private void ClearErrorMessage()
     {
-
+        ErrorMessage = string.Empty;
     }
 
-    private void RegisterUser()
+    private async Task RegisterUser()
     {
-        var user = new LoginDto()
+        ErrorMessage = string.Empty;
+
+        var user = new LoginDto
         {
             Email = RegisteredUser.Email,
             Password = RegisteredUser.Password
         };
-        UserService.RegisterUserAsync(user);
-        RegisteredUser = new();
-    }
 
-    private void GoBack()
-    {
-        Console.WriteLine("Should redirect to home-page");
+        try
+        {
+            await UserService.RegisterUserAsync(user);
+            RegisteredUser = new LoginDto();
+            NavigationManager.NavigateTo("/login");
+        }
+        catch (UserAlreadyExistsException e)
+        {
+            ErrorMessage = "A user with this email already exists";
+        }
     }
-
 }

@@ -1,10 +1,10 @@
 using ShowTime.BusinessLogic.Abstractions;
 using ShowTime.BusinessLogic.Dto.UserDto;
+using ShowTime.DataAccess.Exceptions;
 using ShowTime.DataAccess.Models;
 using ShowTime.DataAccess.Repositories.Interfaces;
 
 namespace ShowTime.BusinessLogic.Services;
-// make an actual login/register component
 public class UserService(IUserRepository userRepository) : IUserService
 {
     public async Task RegisterUserAsync(LoginDto userCreateDto)
@@ -18,9 +18,13 @@ public class UserService(IUserRepository userRepository) : IUserService
             };
             await userRepository.RegisterUserAsync(createUser);
         }
+        catch (UserAlreadyExistsException e)
+        {
+            throw;
+        }
         catch (Exception e)
         {
-            throw new Exception($"Error while trying to add user {e.Message}");
+            throw new Exception($"Error occured while trying to register user: {e.Message}");
         }
     }
 
@@ -33,6 +37,10 @@ public class UserService(IUserRepository userRepository) : IUserService
             {
                 Role = user.Role,
             };
+        }
+        catch (WrongPasswordError)
+        {
+            throw;
         }
         catch (Exception e)
         {

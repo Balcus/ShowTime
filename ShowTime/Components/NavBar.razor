@@ -1,25 +1,42 @@
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
 <nav class="navbar">
-    <AuthorizeView Roles="Admin">
-        <div class="navbar-left">
-            <a href="/artists" class="nav-link">Artists</a>
-            <a href="/festivals" class="nav-link">Festivals</a>
-            <a href="/" class="nav-link">Home</a>
-        </div>
-    </AuthorizeView>
+    <div class="navbar-left">
+        <a href="/artists" class="nav-link">Artists</a>
+        <a href="/festivals" class="nav-link">Festivals</a>
+        <a href="/" class="nav-link">Home</a>
+    </div>
 
     <div class="navbar-center">
         <h1 class="logo">SHOW • TIME</h1>
     </div>
 
     <div class="navbar-right">
-        <a href="/register" class="user-profile-button-link">
-            <button class="user-profile-button">
-                👤 REGISTER
-            </button>
-        </a>
+            <AuthorizeView>
+                <NotAuthorized><button class="user-profile-button" @onclick="NavigateToLogIn">👤 LOG IN</button></NotAuthorized>
+                <Authorized><button class="user-profile-button" @onclick="NavigateToUserProfile">👤 PROFILE</button></Authorized>
+            </AuthorizeView>
     </div>
 </nav>
 
 @code {
-    
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    private void NavigateToLogIn()
+    {
+        Navigation.NavigateTo("/login");
+    }
+
+    private void NavigateToLogOut()
+    {
+        Navigation.NavigateTo("/logout", forceLoad: true);
+    }
+
+
+    private void NavigateToUserProfile()
+    {
+        Navigation.NavigateTo("/user");
+    }
+
 }
