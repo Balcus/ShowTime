@@ -2,14 +2,18 @@
 @inject IFestivalService FestivalService
 @using ShowTime.BusinessLogic.Abstractions
 @using ShowTime.BusinessLogic.Dto.ArtistDto
+@using ShowTime.BusinessLogic.Dto.FestivalDto
 @using ShowTime.BusinessLogic.Dto.LineupDto
+@rendermode InteractiveServer
 
 <PageTitle>Festival lineup</PageTitle>
 
 <div class="lineup-container">
     <div class="lineup-header">
+        <button @onclick="ShowAddDialog" class="add-lineup-btn">📌 Add Lineup</button>
         <h1 class="lineup-title">Festival Lineup</h1>
     </div>
+    
 
     @if (ValidLineups.Any())
     {
@@ -67,24 +71,65 @@
             <p>This festival doesn't have any scheduled performances</p>
         </div>
     }
+    
+    <Dialog Title="Add New Lineup" Opened="_showAddDialog" CloseButtonClicked="@(() => _showAddDialog = false)">
+        <BodyContent>
+            <div class="sticky-form">
+                <EditForm Model="NewLineup" OnValidSubmit="AddLineupAsync" FormName="AddLineupForm">
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
+                    <div class="form-group">
+                        <label>Artist</label>
+                        <InputSelect @bind-Value="NewLineup.ArtistId" class="form-control">
+                            @foreach (var artist in Artists)
+                            {
+                                <option value="@artist.Id">@artist.Name</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => NewLineup.ArtistId)"/>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Stage</label>
+                        <InputText @bind-Value="NewLineup.Stage" class="form-control" placeholder="Enter a stage"/>
+                        <ValidationMessage For="@(() => NewLineup.Stage)"></ValidationMessage>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="datetime-local" @bind="NewLineup.StartTime" class="form-control" />
+                        <ValidationMessage For="@(() => NewLineup.StartTime)"></ValidationMessage>
+                    </div>
+                    
+                    <button class="btn">Add Lineup</button>
+                </EditForm>
+            </div>
+        </BodyContent>
+    </Dialog>
+    
 </div>
 
 @code {
-    private List<LineupGetDto> Lineups { get; set; } = new();
-    private List<ArtistGetDto> Artists { get; set; } = new();
+    private bool _showAddDialog;
+    private LineupGetDto NewLineup { get; set; } = new();
+
+    private FestivalGetDto Festival { get; set; } = new();
+    private List<LineupGetDto> Lineups { get; set; } = [];
+    private List<ArtistGetDto> Artists { get; set; } = [];
     [Parameter] public required string FestivalId { get; set; }
 
     private List<LineupGetDto> ValidLineups => Lineups.Where(l => l.StartTime != default(DateTime)).ToList();
-    private List<LineupGetDto> InvalidLineups => Lineups.Where(l => l.StartTime == default(DateTime)).ToList();
-
     private Dictionary<DateTime, List<LineupGetDto>> GroupedLineups => 
         ValidLineups.GroupBy(l => l.StartTime.Date)
                    .ToDictionary(g => g.Key, g => g.ToList());
 
     protected override async Task OnInitializedAsync()
     {
+        Festival = (await FestivalService.GetFestivalByIdAsync(int.Parse(FestivalId)))!;
         Lineups = await FestivalService.GetLineupsForFestivalAsync(int.Parse(FestivalId));
         Artists = await FestivalService.GetArtistsForFestivalAsync(int.Parse(FestivalId));
+
+        NewLineup.StartTime = Festival.StartDate;
     }
 
     private static List<int> GetHoursForDay(List<LineupGetDto> dayLineups)
@@ -130,4 +175,21 @@
     {
         return Artists.FirstOrDefault(a => a.Id == artistId);
     }
+
+    private void ShowAddDialog()
+    {
+        _showAddDialog = true;
+    }
+
+    private async Task AddLineupAsync()
+    {
+        await FestivalService.AddFestivalLineupAsync(int.Parse(FestivalId), NewLineup);
+        NewLineup = new LineupGetDto
+        {
+            StartTime = Festival.StartDate
+        };
+        Lineups = await FestivalService.GetLineupsForFestivalAsync(int.Parse(FestivalId));
+        _showAddDialog = false;
+    }
+
 }

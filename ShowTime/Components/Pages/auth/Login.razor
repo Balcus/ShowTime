@@ -94,6 +94,10 @@
                 throw new Exception($"Http context is null!");
             }
         }
+        catch (UserDoesntExistException)
+        {
+            ErrorMessage = "The email does not correspond to a user. Please register";
+        }
         catch (WrongPasswordError)
         {
             ErrorMessage = "The provided password is wrong";

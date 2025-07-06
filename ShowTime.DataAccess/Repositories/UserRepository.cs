@@ -35,7 +35,7 @@ public class UserRepository(ShowTimeDbContext context) : BaseRepository<User>(co
 
             if (user == null)
             {
-                throw new Exception($"User with email {email} does not exist");
+                throw new UserDoesntExistException();
             }
 
             var isSame = PasswordHasher.ComparePasswords(user.Password, providedPassword);
@@ -47,6 +47,10 @@ public class UserRepository(ShowTimeDbContext context) : BaseRepository<User>(co
             throw new WrongPasswordError();
         }
         catch (WrongPasswordError e)
+        {
+            throw;
+        }
+        catch (UserDoesntExistException e)
         {
             throw;
         }

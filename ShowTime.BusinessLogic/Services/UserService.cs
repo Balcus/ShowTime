@@ -42,6 +42,10 @@ public class UserService(IUserRepository userRepository) : IUserService
         {
             throw;
         }
+        catch (UserDoesntExistException e)
+        {
+            throw;
+        }
         catch (Exception e)
         {
             // todo

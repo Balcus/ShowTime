@@ -4,7 +4,8 @@ namespace ShowTime.DataAccess.Repositories.Interfaces;
 
 public interface IFestivalRepository : IRepository<Festival>
 {
-    Task<ICollection<Artist>?> GetFestivalArtists(int id);
-    Task<ICollection<Lineup>?> GetFestivalLineups(int id);
-    Task UpdateFestivalArtists(int id, List<Artist> artists);
+    Task<ICollection<Artist>?> GetFestivalArtistsAsync(int id);
+    Task<ICollection<Lineup>?> GetFestivalLineupsAsync(int id);
+    Task UpdateFestivalArtistsAsync(int id, List<Artist> artists);
+    Task AddFestivalLineupAsync(int festivalId, Lineup lineup);
 }

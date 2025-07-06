@@ -47,7 +47,7 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
 
     public async Task UpdateFestivalArtistsAsync(int id, List<ArtistGetDto> updatedArtists)
     {
-        List<Artist> newArtists = updatedArtists
+        var newArtists = updatedArtists
             .Select(artist => new Artist {
                 Id = artist.Id,
                 Name = artist.Name,
@@ -55,7 +55,7 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
                 Genre = artist.Genre,
             }).ToList();
 
-        await festivalRepository.UpdateFestivalArtists(id, newArtists);
+        await festivalRepository.UpdateFestivalArtistsAsync(id, newArtists);
     }
 
     public async Task<IList<FestivalGetDto>> GetAllFestivalsAsync()
@@ -206,6 +206,25 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
         catch (Exception e)
         {
             throw new Exception($"Error while trying to retire artists for festival with id {festivalId}: {e.Message}");
+        }
+    }
+    
+    public async Task AddFestivalLineupAsync(int festivalId, LineupGetDto lineupDto)
+    {
+        try
+        {
+            var lineup = new Lineup()
+            {
+                FestivalId = festivalId,
+                ArtistId = lineupDto.ArtistId,
+                Stage = lineupDto.Stage,
+                StartTime = lineupDto.StartTime,
+            };
+            await festivalRepository.AddFestivalLineupAsync(festivalId, lineup);
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error while trying to add line up to the festival with id: {festivalId}: {e.Message}");
         }
     }
 }

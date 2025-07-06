@@ -23,7 +23,7 @@ public class FestivalRepository(ShowTimeDbContext context) : BaseRepository<Fest
             .Include(f => f.Artists)
             .FirstOrDefaultAsync(f => f.Id == id);
     }
-    public async Task<ICollection<Artist>?> GetFestivalArtists(int id)
+    public async Task<ICollection<Artist>?> GetFestivalArtistsAsync(int id)
     {
         try
         {
@@ -40,7 +40,7 @@ public class FestivalRepository(ShowTimeDbContext context) : BaseRepository<Fest
         }
     }
 
-    public async Task<ICollection<Lineup>?> GetFestivalLineups(int id)
+    public async Task<ICollection<Lineup>?> GetFestivalLineupsAsync(int id)
     {
         try
         {
@@ -57,7 +57,7 @@ public class FestivalRepository(ShowTimeDbContext context) : BaseRepository<Fest
         }
     }
 
-    public async Task UpdateFestivalArtists(int id, List<Artist> artists)
+    public async Task UpdateFestivalArtistsAsync(int id, List<Artist> artists)
     {
         var festival = await Context
             .Set<Festival>()
@@ -84,5 +84,34 @@ public class FestivalRepository(ShowTimeDbContext context) : BaseRepository<Fest
             }
         }
         await Context.SaveChangesAsync();
+    }
+
+    public async Task AddFestivalLineupAsync(int festivalId, Lineup addedLineup)
+    {
+        try
+        {
+            var festival = await Context
+                .Set<Festival>()
+                .Include(f => f.Lineups)
+                .FirstOrDefaultAsync(f => f.Id == festivalId);
+            
+            if (festival == null)
+            {
+                throw new Exception($"Festival with ID {festivalId} not found");
+            }
+            
+            var lineup = festival.Lineups.FirstOrDefault(l => l.FestivalId == festivalId && l.ArtistId == addedLineup.ArtistId);
+            if (lineup == null)
+            {
+                throw new Exception($"Lineup for festival {festivalId} with artist: {addedLineup.ArtistId} not found");
+            }
+            lineup.StartTime = addedLineup.StartTime;
+            lineup.Stage = addedLineup.Stage;
+            await Context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error while trying to add lineup to festival with id {festivalId}: {e.Message}");
+        }
     }
 }
