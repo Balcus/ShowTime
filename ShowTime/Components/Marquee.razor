@@ -1,0 +1,29 @@
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.ArtistDto
+@inject IArtistService ArtistService
+@page "/test"
+
+<div class="wrapper">
+    <div class="marquee-text fadeout-horizontal">
+        <div class="marquee-text-track">
+            @foreach (var artist in Artists)
+            {
+                <p>@artist.Name.ToUpper()</p>
+            }
+            @foreach (var artist in Artists)
+            {
+                <p aria-hidden="true">@artist.Name.ToUpper()</p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ArtistGetDto> Artists { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        Artists = (List<ArtistGetDto>)await ArtistService.GetAllArtistsAsync();
+    }
+
+}

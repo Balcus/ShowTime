@@ -1,98 +1,188 @@
 .user-wrapper {
     min-height: 100vh;
-    background: rgba(222, 255, 191, 0.98);
+    background: #F4F8D3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 2rem;
     font-family: 'Courier New', monospace;
-    position: relative;
 }
 
 .page-content {
-    max-width: 800px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 2rem;
 }
 
 .profile-card {
-    margin-top: 2rem;
     background: #fff;
     border: 4px solid #000;
-    box-shadow: 8px 8px 0 #000;
-    margin-bottom: 2rem;
-    position: relative;
+    box-shadow: 6px 6px 0 #000;
     overflow: hidden;
 }
 
 .profile-header {
-    background: #FFFBDE;
-    color: #000;
+    background: #A6D6D6;
     padding: 1.5rem;
+    border-bottom: 4px solid #000;
     display: flex;
     align-items: center;
     gap: 1rem;
-    border-bottom: 4px solid #000;
 }
 
 .profile-icon {
     font-size: 2rem;
-    background: #F8F8F8;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #000;
 }
 
 .profile-title {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     font-weight: 900;
+    letter-spacing: 0.05em;
+    color: #000;
     margin: 0;
-    letter-spacing: 0.1em;
 }
 
 .profile-body {
-    padding: 2rem;
-    background: #91C8E4;
+    padding: 1.5rem;
 }
 
 .profile-text {
     font-size: 1.1rem;
-    line-height: 1.6;
-    color: #fff;
+    color: #333;
     margin: 0;
+}
+
+.admin-wrapper {
+    max-width: 1200px;
+    width: 100%;
+}
+
+.admin-panel {
+    margin-top: 2rem;
+    background: #fff;
+    border: 4px solid #000;
+    box-shadow: 6px 6px 0 #000;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+}
+
+.admin-title {
+    background: #A6D6D6;
+    padding: 1.5rem;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    border-bottom: 4px solid #000;
+    color: #000;
+}
+
+.no-users {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.user-table-container {
+    overflow-x: auto;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+    background: #fff;
+    color: #000;
+}
+
+.user-table th {
+    background: #A6D6D6;
+    color: #fff;
+    padding: 1rem;
+    font-weight: 900;
+    text-align: left;
+    border-bottom: 4px solid #000;
+    border-right: 2px solid #000;
+}
+
+.user-table td {
+    padding: 1rem;
+    border-bottom: 2px solid #000;
+    border-right: 2px solid #000;
+    vertical-align: top;
+    background: #fff;
+}
+
+.user-table tr:last-child td {
+    border-bottom: none;
+}
+
+.user-table td:last-child,
+.user-table th:last-child {
+    border-right: none;
+}
+
+.user-table tr:hover td {
+    background: rgba(165, 165, 165, 0.91);
+}
+
+.no-bookings {
+    font-style: italic;
+    color: #333;
     font-weight: 600;
 }
 
-.button-actions {
-    display: flex;
-    justify-content: center;
-    margin-top: 3rem;
+.booking-list {
+    list-style: none;
+    margin: 0;
+    padding-left: 0;
 }
 
-.logout-btn {
-    background: #91C8E4;
-    border: 4px solid #000;
-    color: #fff;
-    padding: 1rem 2rem;
-    font-size: 1.2rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.1s ease;
-    box-shadow: 6px 6px 0 #000;
-    font-family: 'Courier New', monospace;
-    min-width: 200px;
-}
-
-.logout-btn:hover {
-    background: #62cbfa;
-    color: #fff;
-    transform: translate(2px, 2px);
+.booking-list li {
+    margin-bottom: 0.5rem;
+    background: #fff;
+    border: 2px solid #000;
+    padding: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
     box-shadow: 4px 4px 0 #000;
 }
 
+.button-actions {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.logout-btn {
+    padding: 1rem 2rem;
+    background-color: #A6D6D6;
+    border: 4px solid #000;
+    box-shadow: 6px 6px 0 #000;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 900;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    background-color: #a4ffff;
+    box-shadow: 2px 2px 0 #000;
+    transform: translate(2px, 2px);
+}
+
+.logout-btn:active {
+    background-color: #A6D6D6;
+    box-shadow: 0 0 0 #000;
+    transform: translate(4px, 4px);
+}
+
 .btn-text {
-    position: relative;
-    z-index: 2;
+    letter-spacing: 0.05em;
 }

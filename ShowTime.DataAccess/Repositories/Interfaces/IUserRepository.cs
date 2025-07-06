@@ -8,4 +8,5 @@ public interface IUserRepository : IRepository<User>
     Task<ICollection<Booking>?> GetUserBookingsAsync(int id);
     Task<User> LoginAsync(string email, string password);
     Task RegisterUserAsync(User user);
+    Task<List<User>> GetAllUsersAsync();
 }

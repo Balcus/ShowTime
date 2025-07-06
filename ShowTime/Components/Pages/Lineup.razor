@@ -10,7 +10,9 @@
 
 <div class="lineup-container">
     <div class="lineup-header">
-        <button @onclick="ShowAddDialog" class="add-lineup-btn">📌 Add Lineup</button>
+        <AuthorizeView Roles="Admin">
+            <button @onclick="ShowAddDialog" class="add-lineup-btn">📌 Add Lineup</button>
+        </AuthorizeView>
         <h1 class="lineup-title">Festival Lineup</h1>
     </div>
     

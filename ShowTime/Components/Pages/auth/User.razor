@@ -1,30 +1,97 @@
 @page "/user"
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.UserDto
 @inject NavigationManager Navigation
+@inject IUserService UserService
 @rendermode InteractiveServer
 
 <PageTitle>User</PageTitle>
 
 <div class="user-wrapper">
-    <div class="page-content">
-        <div class="profile-card">
-            <div class="profile-header">
-                <div class="profile-icon">👤</div>
-                <h2 class="profile-title">PROFILE</h2>
-            </div>
-            <div class="profile-body">
-                <p class="profile-text">Content will be added here!!</p>
+    <AuthorizeView Roles="User">
+        <div class="page-content">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-icon">👤</div>
+                    <h2 class="profile-title">PROFILE</h2>
+                </div>
+                <div class="profile-body">
+                    <p class="profile-text">Content will be added here!!</p>
+                </div>
             </div>
         </div>
-        
-        <div class="button-actions">
-            <button class="logout-btn" @onclick="LogOut">
-                <span class="btn-text">LOG OUT</span>
-            </button>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Admin">
+        <div class="admin-wrapper">
+            <div class="admin-panel">
+                @if (Users.Count == 0)
+                {
+                    <p class="no-users">No users found.</p>
+                }
+                else
+                {
+                    <div class="user-table-container">
+                        <table class="user-table">
+                            <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Bookings</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var user in Users)
+                            {
+                                <tr>
+                                    <td>@user.Email</td>
+                                    <td>@user.Role</td>
+                                    <td>
+                                        @if (user.Bookings.Count == 0)
+                                        {
+                                            <span class="no-bookings">No bookings</span>
+                                        }
+                                        else
+                                        {
+                                            <ul class="booking-list">
+                                                @foreach (var booking in user.Bookings)
+                                                {
+                                                    <li>
+                                                        <strong>FestivalId:</strong> @booking.FestivalId,
+                                                        <strong>UserId:</strong> @booking.UserId,
+                                                        <strong>Type:</strong> @booking.Type,
+                                                        <strong>Price:</strong> $@booking.Price
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
         </div>
+    </AuthorizeView>
+    
+    <div class="button-actions">
+        <button class="logout-btn" @onclick="LogOut">
+            <span class="btn-text">LOG OUT</span>
+        </button>
     </div>
+
 </div>
 
 @code {
+    private List<UserGetDto> Users { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        Users = await UserService.GetAllUsersAsync();
+    }
+
     private void LogOut()
     {
         Navigation.NavigateTo("/logout", forceLoad: true);

@@ -10,7 +10,7 @@
     background: antiquewhite;
     font-family: 'Courier New', Courier, monospace;
     border: 4px solid black;
-    box-shadow: 10px 10px 0 black;
+    box-shadow: 10px 10px 0 darkgray;
     flex-wrap: wrap;
 }
 
@@ -21,7 +21,7 @@
     flex-direction: column;
     justify-content: flex-start;
     padding: 3rem;
-    border-right: 4px solid black;
+    border-right: 4px solid darkgray;
     box-shadow: 6px 0 0 black;
 }
 

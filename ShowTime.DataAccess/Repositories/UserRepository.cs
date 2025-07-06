@@ -86,4 +86,20 @@ public class UserRepository(ShowTimeDbContext context) : BaseRepository<User>(co
             throw new Exception($"Error trying to register user with email {user.Email}: {e.Message}");
         }
     }
+
+    public async Task<List<User>> GetAllUsersAsync()
+    {
+        try
+        {
+            return await Context
+                .Set<User>()
+                .Include(u => u.Bookings)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error trying to get all users: {e.Message}");
+        }
+
+    }
 }

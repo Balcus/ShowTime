@@ -8,7 +8,7 @@ namespace ShowTime.BusinessLogic.Services;
 
 public class ArtistService(IRepository<Artist> repository) : IArtistService
 {
-    public async Task<IList<ArtistGetDto>> GetAllArtistsAsync()
+    public async Task<List<ArtistGetDto>> GetAllArtistsAsync()
     {
         try
         {

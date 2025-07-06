@@ -1,5 +1,4 @@
 .page {
-    background-color: #DDF6D2;
     min-height: 100vh;
 }
 
@@ -9,18 +8,20 @@
     color: black;
 }
 
-h2 {
+li .sticky-note h2 {
     font-weight: bold;
     font-size: 2rem;
     margin: 0.8em 0 0.2em;
     text-align: center;
+    color: hsl(0, 0%, 0%);
 }
 
-p {
+li .sticky-note p {
     font-family: 'Reenie Beanie', sans-serif;
     font-size: 2rem;
     text-align: center;
     margin: 0;
+    color: hsl(0, 0%, 20%);
 }
 
 ul, li {
@@ -66,7 +67,7 @@ ul li .sticky-note img {
     max-width: 100%;
     max-height: 6em;
     object-fit: contain;
-    border-radius: 0.25em;
+    border-radius: 70%;
 }
 
 ul li:nth-child(even) .sticky-note {

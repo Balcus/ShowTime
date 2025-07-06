@@ -1,0 +1,44 @@
+.wrapper {
+    padding: 0;
+    color: black;
+    font-size: 3rem;
+}
+
+.marquee-text {
+    background-color: #F7CFD8;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+}
+
+.marquee-text-track {
+    display: flex;
+    gap: 1rem;
+    padding-left: 2rem;
+    animation: marquee-move-text 20s linear infinite;
+    width: max-content;
+}
+
+.marquee-text p {
+    padding: 1rem 2.5rem;
+    margin: 0;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    font-family: sans-serif;
+}
+
+@keyframes marquee-move-text {
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.fadeout-horizontal {
+    mask-image: linear-gradient(
+            to right,
+            transparent,
+            black 5rem,
+            black calc(100% - 5rem),
+            transparent
+    );
+}
