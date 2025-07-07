@@ -100,6 +100,56 @@ public class UserRepository(ShowTimeDbContext context) : BaseRepository<User>(co
         {
             throw new Exception($"Error trying to get all users: {e.Message}");
         }
+    }
 
+    public async Task BookTicketAsync(int userId, Booking booking)
+    {
+        try
+        {
+            var user = await Context
+                .Set<User>()
+                .Include(u => u.Bookings)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                throw new UserNotLoggedException();
+            }
+
+            user.Bookings.Add(booking);
+            await Context.SaveChangesAsync();
+        }
+        catch (UserNotLoggedException e)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error trying to make booking for user with ID {userId}: {e.Message}");
+        }
+    }
+
+    public async Task<int> GetUserIdByEmailAsync(string? email)
+    {
+        try
+        {
+            var user = await Context
+                .Set<User>()
+                .FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                throw new UserDoesntExistException();
+            }
+
+            return user.Id;
+        }
+        catch (UserDoesntExistException e)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error trying to get user with email {email}: {e.Message}");
+        }
     }
 }

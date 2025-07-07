@@ -9,4 +9,6 @@ public interface IUserRepository : IRepository<User>
     Task<User> LoginAsync(string email, string password);
     Task RegisterUserAsync(User user);
     Task<List<User>> GetAllUsersAsync();
+    Task BookTicketAsync(int userId, Booking booking);
+    Task<int> GetUserIdByEmailAsync(string? email);
 }

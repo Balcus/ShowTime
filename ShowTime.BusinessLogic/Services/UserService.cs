@@ -81,4 +81,42 @@ public class UserService(IUserRepository userRepository) : IUserService
         }
     }
 
+    public async Task<int> GetUserIdByEmailAsync(string? email)
+    {
+        try
+        {
+            return await userRepository.GetUserIdByEmailAsync(email);
+        }
+        catch (UserDoesntExistException)
+        {
+            throw new UserDoesntExistException();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error occured while trying to get userId with email {email}: {e.Message}");
+        }
+    }
+
+    public async Task BookTicketAsync(int userId, BookingGetDto newBooking)
+    {
+        try
+        {
+            var booking = new Booking()
+            {
+                FestivalId = newBooking.FestivalId,
+                UserId = userId,
+                Type = newBooking.Type,
+                Price = newBooking.Price
+            };
+            await userRepository.BookTicketAsync(userId, booking);
+        }
+        catch (UserAlreadyExistsException e)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error occured while trying to book ticket: {e.Message}");
+        }
+    }
 }

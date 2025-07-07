@@ -1,17 +1,26 @@
 @page "/festivals/{festivalId}"
 @inject IFestivalService FestivalService
+@using System.Security.Claims
 @using ShowTime.BusinessLogic.Abstractions
 @using ShowTime.BusinessLogic.Dto.ArtistDto
+@using ShowTime.BusinessLogic.Dto.BookingDto
 @using ShowTime.BusinessLogic.Dto.FestivalDto
 @using ShowTime.BusinessLogic.Dto.LineupDto
+@using ShowTime.BusinessLogic.Dto.UserDto
+@using ShowTime.DataAccess.Enums
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IUserService UserService
 @rendermode InteractiveServer
 
 <PageTitle>Festival lineup</PageTitle>
-
+@* Think we need a new table with ticket variants *@
 <div class="lineup-container">
     <div class="lineup-header">
         <AuthorizeView Roles="Admin">
-            <button @onclick="ShowAddDialog" class="add-lineup-btn">📌 Add Lineup</button>
+            <button @onclick="@(() => _showAddDialog = true)" class="lineup-btn">📌 Add Lineup</button>
+        </AuthorizeView>
+        <AuthorizeView Roles="User">
+            <button @onclick="@(async () => await ShowBuyTicketDialog())" class="lineup-btn">📌 Book Ticket</button>
         </AuthorizeView>
         <h1 class="lineup-title">Festival Lineup</h1>
     </div>
@@ -109,16 +118,39 @@
         </BodyContent>
     </Dialog>
     
+    <Dialog Title="Book Ticket" Opened="_showBuyDialog" CloseButtonClicked="@(() => _showBuyDialog = false)">
+        <BodyContent>
+            <div class="sticky-form">
+                <EditForm Model="NewBooking" OnValidSubmit="AddBookingAsync" FormName="AddBookingForm">
+                    @* <label>Booking Type:</label> *@
+                    @* <InputText @bind-Value="NewBooking.Type" class="form-control"/> *@
+                    @* <label>Price:</label> *@
+                    @* <InputText @bind-Value="NewBooking.Price" class="form-control"/> *@
+                    <button class="btn">Book Ticket</button>
+                </EditForm>
+            </div>
+        </BodyContent>
+    </Dialog>
+    
 </div>
 
 @code {
     private bool _showAddDialog;
-    private LineupGetDto NewLineup { get; set; } = new();
+    private bool _showBuyDialog;
 
+    private string? _userEmail;
+    private int _userId;
+    
+    private UserGetDto User { get; set; } = new();
+    private LineupGetDto NewLineup { get; set; } = new();
+    private BookingGetDto NewBooking { get; set; } = new();
     private FestivalGetDto Festival { get; set; } = new();
+    
     private List<LineupGetDto> Lineups { get; set; } = [];
     private List<ArtistGetDto> Artists { get; set; } = [];
+    
     [Parameter] public required string FestivalId { get; set; }
+    [CascadingParameter] private Task<AuthenticationState> Cookies { get; set; } = null!;
 
     private List<LineupGetDto> ValidLineups => Lineups.Where(l => l.StartTime != default(DateTime)).ToList();
     private Dictionary<DateTime, List<LineupGetDto>> GroupedLineups => 
@@ -127,10 +159,15 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var httpContext = HttpContextAccessor.HttpContext;
+        if (httpContext == null)
+        {
+            throw new Exception($"Http context is null!");
+        }
+        
         Festival = (await FestivalService.GetFestivalByIdAsync(int.Parse(FestivalId)))!;
         Lineups = await FestivalService.GetLineupsForFestivalAsync(int.Parse(FestivalId));
         Artists = await FestivalService.GetArtistsForFestivalAsync(int.Parse(FestivalId));
-
         NewLineup.StartTime = Festival.StartDate;
     }
 
@@ -178,11 +215,6 @@
         return Artists.FirstOrDefault(a => a.Id == artistId);
     }
 
-    private void ShowAddDialog()
-    {
-        _showAddDialog = true;
-    }
-
     private async Task AddLineupAsync()
     {
         await FestivalService.AddFestivalLineupAsync(int.Parse(FestivalId), NewLineup);
@@ -192,6 +224,35 @@
         };
         Lineups = await FestivalService.GetLineupsForFestivalAsync(int.Parse(FestivalId));
         _showAddDialog = false;
+    }
+
+    private async Task ShowBuyTicketDialog()
+    {
+        var result = await Cookies;
+        _userEmail = result.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Email)!.Value;
+        
+        if (_userEmail == null)
+        {
+            throw new Exception("Could not retrieve email from cookies");
+        }
+        
+        _userId = await UserService.GetUserIdByEmailAsync(_userEmail);
+        NewBooking = new BookingGetDto()
+        {
+            FestivalId = Festival.Id,
+            UserId = _userId,
+            Type = BookingType.Regular,
+            Price = 100f
+        };
+        _showBuyDialog = true;
+        
+    }
+
+    private async Task AddBookingAsync()
+    {
+        await UserService.BookTicketAsync(_userId, NewBooking);
+        NewBooking = new();
+        _showBuyDialog = false;
     }
 
 }
