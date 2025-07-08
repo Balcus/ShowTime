@@ -1,5 +1,6 @@
 using ShowTime.BusinessLogic.Abstractions;
 using ShowTime.BusinessLogic.Dto.BookingDto;
+using ShowTime.BusinessLogic.Dto.TicketDto;
 using ShowTime.BusinessLogic.Dto.UserDto;
 using ShowTime.DataAccess.Exceptions;
 using ShowTime.DataAccess.Models;
@@ -66,10 +67,9 @@ public class UserService(IUserRepository userRepository) : IUserService
                 Role = user.Role,
                 Bookings = user.Bookings.Select(b => new BookingGetDto
                 {
-                    FestivalId = b.FestivalId,
-                    UserId = b.UserId,
-                    Type = b.Type,
-                    Price = b.Price
+                    TicketId = b.TicketId,
+                    Id = b.Id,
+                    UserId = b.UserId
                 }).ToList()
             }).ToList();
 
@@ -97,26 +97,59 @@ public class UserService(IUserRepository userRepository) : IUserService
         }
     }
 
-    public async Task BookTicketAsync(int userId, BookingGetDto newBooking)
+    public async Task BookTicketAsync(int userId, int ticketId)
     {
         try
         {
-            var booking = new Booking()
-            {
-                FestivalId = newBooking.FestivalId,
-                UserId = userId,
-                Type = newBooking.Type,
-                Price = newBooking.Price
-            };
-            await userRepository.BookTicketAsync(userId, booking);
-        }
-        catch (UserAlreadyExistsException e)
-        {
-            throw;
+            await userRepository.BookTicketAsync(userId, ticketId);
         }
         catch (Exception e)
         {
             throw new Exception($"Error occured while trying to book ticket: {e.Message}");
         }
+    }
+
+    public async  Task<List<BookingGetDto>> GetUserBookings(int userId)
+    {
+        try
+        {
+            var bookings = await userRepository.GetUserBookingsAsync(userId);
+            return bookings.Select(userBooking => new BookingGetDto()
+            {
+                Id = userBooking.Id,
+                UserId = userBooking.UserId,
+                TicketId = userBooking.TicketId
+            }).ToList();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error occured while trying to get user bookings: {e.Message}");
+        }
+    }
+
+    public async Task<List<TicketGetDto>> GetUserTickets(int userId)
+    {
+        try
+        {
+            var tickets = await userRepository.GetUserTicketsAsync(userId);
+            return tickets.Select(t => new TicketGetDto()
+            {
+                Id = t.Id,
+                FestivalId = t.FestivalId,
+                Name = t.Name,
+                Price = t.Price,
+                Quantity = t.Quantity,
+                Type = t.Type
+            }).ToList();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error occured while trying to get user {userId} tickets: {e.Message}");
+        }
+    }
+
+    public async Task DeleteUserBookingAsync(int userId, int ticketId)
+    {
+        await userRepository.DeleteUserBookingAsync(userId, ticketId);
     }
 }

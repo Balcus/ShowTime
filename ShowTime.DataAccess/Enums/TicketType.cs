@@ -1,8 +1,10 @@
 namespace ShowTime.DataAccess.Enums;
 
-public enum BookingType
+public enum TicketType
 {
     Regular,
     Vip,
     Student,
+    Backstage,
+    EarlyBird,
 }

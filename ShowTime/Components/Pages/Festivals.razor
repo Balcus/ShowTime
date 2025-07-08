@@ -49,7 +49,7 @@
                             <div class="festival-meta">
                                 <span class="location-badge">📍 @festival.Location</span>
                                 <span class="date-badge">📅 @festival.StartDate.ToString("MMM dd") - @festival.EndDate.ToString("MMM dd")</span>
-                                <span class="capacity-badge">👥 @festival.Capacity</span>
+                                <span class="capacity-badge">👥 @festival.TotalAvailableTickets</span>
                             </div>
                         </div>
                         
@@ -93,8 +93,6 @@
                     <InputDate @bind-Value="NewFestival.StartDate" class="form-control" min="@DateTime.Now.ToString("yyyy MMMM dd")"/>
                     <label>End Date:</label>
                     <InputDate @bind-Value="NewFestival.EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy MMMM dd")"/>
-                    <label>Capacity:</label>
-                    <InputNumber @bind-Value="NewFestival.Capacity" class="form-control"/>
                     <label>Location:</label>
                     <InputText @bind-Value="NewFestival.Location" class="form-control"/>
                     <button class="btn">Add Festival</button>
@@ -116,8 +114,6 @@
                     <InputDate @bind-Value="UpdatedFestival.StartDate" class="form-control" min="@DateTime.Now.ToString("yyyy MMMM dd")"/>
                     <label>New End Date:</label>
                     <InputDate @bind-Value="UpdatedFestival.EndDate" class="form-control" min="@DateTime.Now.ToString("yyyy MMMM dd")"/>
-                    <label>New Capacity:</label>
-                    <InputNumber @bind-Value="UpdatedFestival.Capacity" class="form-control"/>
                     <label>New Location:</label>
                     <InputText @bind-Value="UpdatedFestival.Location" class="form-control"/>
                     <button class="btn">Update Festival</button>
@@ -257,7 +253,6 @@
     {
         await FestivalService.UpdateFestivalAsync(_updateFestivalId,new FestivalCreateDto()
         {
-            Capacity = UpdatedFestival.Capacity,
             EndDate = UpdatedFestival.EndDate,
             StartDate = UpdatedFestival.StartDate,
             Location = UpdatedFestival.Location,
@@ -275,7 +270,6 @@
         UpdatedFestival = new FestivalCreateDto()
         {
             Name = updatedFestival.Name,
-            Capacity = updatedFestival.Capacity,
             Location = updatedFestival.Location,
             StartDate = updatedFestival.StartDate,
             EndDate = updatedFestival.EndDate,

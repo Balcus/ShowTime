@@ -1,30 +1,23 @@
 @page "/festivals/{festivalId}"
 @inject IFestivalService FestivalService
-@using System.Security.Claims
 @using ShowTime.BusinessLogic.Abstractions
 @using ShowTime.BusinessLogic.Dto.ArtistDto
 @using ShowTime.BusinessLogic.Dto.BookingDto
 @using ShowTime.BusinessLogic.Dto.FestivalDto
 @using ShowTime.BusinessLogic.Dto.LineupDto
+@using ShowTime.BusinessLogic.Dto.TicketDto
 @using ShowTime.BusinessLogic.Dto.UserDto
 @using ShowTime.DataAccess.Enums
 @inject IHttpContextAccessor HttpContextAccessor
-@inject IUserService UserService
+@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
 <PageTitle>Festival lineup</PageTitle>
 @* Think we need a new table with ticket variants *@
 <div class="lineup-container">
     <div class="lineup-header">
-        <AuthorizeView Roles="Admin">
-            <button @onclick="@(() => _showAddDialog = true)" class="lineup-btn">📌 Add Lineup</button>
-        </AuthorizeView>
-        <AuthorizeView Roles="User">
-            <button @onclick="@(async () => await ShowBuyTicketDialog())" class="lineup-btn">📌 Book Ticket</button>
-        </AuthorizeView>
         <h1 class="lineup-title">Festival Lineup</h1>
     </div>
-    
 
     @if (ValidLineups.Any())
     {
@@ -83,6 +76,17 @@
         </div>
     }
     
+    <div class="lineup-footer">
+        <AuthorizeView Roles="Admin">
+            <button @onclick="@(() => _showAddDialog = true)" class="lineup-btn">📌 Add Lineup</button>
+            <button @onclick="@(() => _showTicketDialog = true)" class="lineup-btn">🎫 Add Ticket</button>
+        </AuthorizeView>
+        <AuthorizeView Roles="User">
+            <button @onclick="NavigateToTickets" class="lineup-btn">📌 Book Ticket</button>
+        </AuthorizeView>
+    </div>
+
+    
     <Dialog Title="Add New Lineup" Opened="_showAddDialog" CloseButtonClicked="@(() => _showAddDialog = false)">
         <BodyContent>
             <div class="sticky-form">
@@ -117,16 +121,44 @@
             </div>
         </BodyContent>
     </Dialog>
-    
-    <Dialog Title="Book Ticket" Opened="_showBuyDialog" CloseButtonClicked="@(() => _showBuyDialog = false)">
+
+    <Dialog Title="Add New Ticket" Opened="_showTicketDialog" CloseButtonClicked="@(() => _showTicketDialog = false)">
         <BodyContent>
             <div class="sticky-form">
-                <EditForm Model="NewBooking" OnValidSubmit="AddBookingAsync" FormName="AddBookingForm">
-                    @* <label>Booking Type:</label> *@
-                    @* <InputText @bind-Value="NewBooking.Type" class="form-control"/> *@
-                    @* <label>Price:</label> *@
-                    @* <InputText @bind-Value="NewBooking.Price" class="form-control"/> *@
-                    <button class="btn">Book Ticket</button>
+                <EditForm Model="NewTicket" OnValidSubmit="AddTicketAsync" FormName="AddTicketForm">
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
+                    
+                    <div class="form-group">
+                        <label>Ticket Name</label>
+                        <InputText @bind-Value="NewTicket.Name" class="form-control" placeholder="Enter ticket name (e.g., Early Bird, VIP, Regular)"/>
+                        <ValidationMessage For="@(() => NewTicket.Name)"/>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Ticket Type</label>
+                        <InputSelect @bind-Value="NewTicket.Type" class="form-control">
+                            @foreach (var ticketType in Enum.GetValues<TicketType>())
+                            {
+                                <option value="@ticketType">@ticketType</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => NewTicket.Type)"/>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Price</label>
+                        <InputNumber @bind-Value="NewTicket.Price" class="form-control" placeholder="Enter price" step="0.01"/>
+                        <ValidationMessage For="@(() => NewTicket.Price)"/>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <InputNumber @bind-Value="NewTicket.Quantity" class="form-control" placeholder="Enter available quantity"/>
+                        <ValidationMessage For="@(() => NewTicket.Quantity)"/>
+                    </div>
+                    
+                    <button class="btn">Add Ticket</button>
                 </EditForm>
             </div>
         </BodyContent>
@@ -136,21 +168,23 @@
 
 @code {
     private bool _showAddDialog;
-    private bool _showBuyDialog;
-
-    private string? _userEmail;
-    private int _userId;
+    private bool _showTicketDialog;
+    private int _festivalId;
+    
+    // private string? _userEmail;
+    // private int _userId;
     
     private UserGetDto User { get; set; } = new();
     private LineupGetDto NewLineup { get; set; } = new();
     private BookingGetDto NewBooking { get; set; } = new();
+    private TicketCreateDto NewTicket { get; set; } = new();
     private FestivalGetDto Festival { get; set; } = new();
+    private List<TicketGetDto> FestivalTickets { get; set; } = [];
     
     private List<LineupGetDto> Lineups { get; set; } = [];
     private List<ArtistGetDto> Artists { get; set; } = [];
-    
+
     [Parameter] public required string FestivalId { get; set; }
-    [CascadingParameter] private Task<AuthenticationState> Cookies { get; set; } = null!;
 
     private List<LineupGetDto> ValidLineups => Lineups.Where(l => l.StartTime != default(DateTime)).ToList();
     private Dictionary<DateTime, List<LineupGetDto>> GroupedLineups => 
@@ -165,10 +199,14 @@
             throw new Exception($"Http context is null!");
         }
         
-        Festival = (await FestivalService.GetFestivalByIdAsync(int.Parse(FestivalId)))!;
-        Lineups = await FestivalService.GetLineupsForFestivalAsync(int.Parse(FestivalId));
-        Artists = await FestivalService.GetArtistsForFestivalAsync(int.Parse(FestivalId));
+        _festivalId = int.Parse(FestivalId);
+        Festival = (await FestivalService.GetFestivalByIdAsync(_festivalId))!;
+        Lineups = await FestivalService.GetLineupsForFestivalAsync(_festivalId);
+        Artists = await FestivalService.GetArtistsForFestivalAsync(_festivalId);
+        FestivalTickets = await FestivalService.GetTicketsForFestivalAsync(_festivalId);
         NewLineup.StartTime = Festival.StartDate;
+        
+        NewTicket = new TicketCreateDto { FestivalId = _festivalId };
     }
 
     private static List<int> GetHoursForDay(List<LineupGetDto> dayLineups)
@@ -226,33 +264,17 @@
         _showAddDialog = false;
     }
 
-    private async Task ShowBuyTicketDialog()
+    private async Task AddTicketAsync()
     {
-        var result = await Cookies;
-        _userEmail = result.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Email)!.Value;
-        
-        if (_userEmail == null)
-        {
-            throw new Exception("Could not retrieve email from cookies");
-        }
-        
-        _userId = await UserService.GetUserIdByEmailAsync(_userEmail);
-        NewBooking = new BookingGetDto()
-        {
-            FestivalId = Festival.Id,
-            UserId = _userId,
-            Type = BookingType.Regular,
-            Price = 100f
-        };
-        _showBuyDialog = true;
-        
+        await FestivalService.AddTicketForFestivalAsync(_festivalId, NewTicket);
+        NewTicket = new TicketCreateDto { FestivalId = _festivalId };
+        FestivalTickets = await FestivalService.GetTicketsForFestivalAsync(_festivalId);
+        _showTicketDialog = false;
     }
 
-    private async Task AddBookingAsync()
+    private void NavigateToTickets()
     {
-        await UserService.BookTicketAsync(_userId, NewBooking);
-        NewBooking = new();
-        _showBuyDialog = false;
+        NavigationManager.NavigateTo($"/festivals/{FestivalId}/tickets");
     }
 
 }

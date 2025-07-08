@@ -1,11 +1,18 @@
 @page "/user"
+@using System.Security.Claims
 @using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.BookingDto
+@using ShowTime.BusinessLogic.Dto.TicketDto
 @using ShowTime.BusinessLogic.Dto.UserDto
 @inject NavigationManager Navigation
 @inject IUserService UserService
 @rendermode InteractiveServer
 
 <PageTitle>User</PageTitle>
+
+@* maybe split this page into two : *@
+@* one for the admin view *@
+@* one for the user view *@
 
 <div class="user-wrapper">
     <AuthorizeView Roles="User">
@@ -16,7 +23,38 @@
                     <h2 class="profile-title">PROFILE</h2>
                 </div>
                 <div class="profile-body">
-                    <p class="profile-text">Content will be added here!!</p>
+                    @if (UserBookings.Count > 0)
+                    {
+                        <p>Total Bookings: @UserBookings.Count</p>
+                        <table class="ticket-table">
+                            <thead>
+                            <tr>
+                                <th>Ticket Name</th>
+                                <th>Ticket Type</th>
+                                <th>Ticket Price</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var ticket in UserTickets)
+                            {
+                                <tr>
+                                    <td>@ticket.Name</td>
+                                    <td>@ticket.Type</td>
+                                    <td>@ticket.Price</td>
+                                    <td><button @onclick="@(async () => await DeleteBooking(@ticket.Id))">🗑️</button></td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="no-bookings">
+                            <p>You do not currently have any bookings</p>
+                        </div>
+                    }
+
                 </div>
             </div>
         </div>
@@ -57,10 +95,8 @@
                                                 @foreach (var booking in user.Bookings)
                                                 {
                                                     <li>
-                                                        <strong>FestivalId:</strong> @booking.FestivalId,
+                                                        <strong>FestivalId:</strong> @booking.TicketId,
                                                         <strong>UserId:</strong> @booking.UserId,
-                                                        <strong>Type:</strong> @booking.Type,
-                                                        <strong>Price:</strong> $@booking.Price
                                                     </li>
                                                 }
                                             </ul>
@@ -85,10 +121,25 @@
 </div>
 
 @code {
+    private int _userId;
+    [CascadingParameter] private Task<AuthenticationState> Cookies { get; set; } = null!;
     private List<UserGetDto> Users { get; set; } = [];
+    private List<TicketGetDto> UserTickets { get; set; } = [];
+    private List<BookingGetDto> UserBookings { get; set; } = [];
 
     protected override async Task OnInitializedAsync()
     {
+        var result = await Cookies;
+        var userEmail = result.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Email)?.Value;
+
+        if (userEmail == null)
+        {
+            throw new Exception("Could not retrieve email from cookies");
+        }
+
+        _userId = await UserService.GetUserIdByEmailAsync(userEmail);
+        UserTickets = await UserService.GetUserTickets(_userId);
+        UserBookings = await UserService.GetUserBookings(_userId);
         Users = await UserService.GetAllUsersAsync();
     }
 
@@ -96,4 +147,12 @@
     {
         Navigation.NavigateTo("/logout", forceLoad: true);
     }
+
+    private async Task DeleteBooking(int ticketId)
+    {
+        await UserService.DeleteUserBookingAsync(_userId, ticketId);
+        UserTickets = await UserService.GetUserTickets(_userId);
+        UserBookings = await UserService.GetUserBookings(_userId);
+    }
+
 }

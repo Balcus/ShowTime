@@ -18,6 +18,7 @@ builder.Services.AddTransient<IFestivalRepository, FestivalRepository>();
 builder.Services.AddTransient<IRepository<Artist>, BaseRepository<Artist>>();
 builder.Services.AddTransient<IRepository<Lineup>, BaseRepository<Lineup>>();
 builder.Services.AddTransient<IRepository<Booking>, BaseRepository<Booking>>();
+builder.Services.AddTransient<IRepository<Ticket>, BaseRepository<Ticket>>();
 
 builder.Services.AddTransient<IArtistService, ArtistService>();
 builder.Services.AddTransient<IFestivalService, FestivalService>();

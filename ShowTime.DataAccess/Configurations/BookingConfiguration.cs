@@ -9,8 +9,8 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
     public void Configure(EntityTypeBuilder<Booking> builder)
     {
         builder.ToTable("Booking");
-        builder.HasKey(x => new { x.FestivalId, x.UserId });
-        builder.Property(x => x.Type).HasConversion<string>();
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
         
         builder
             .HasOne(x => x.User)
@@ -18,8 +18,8 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .HasForeignKey(x => x.UserId);
         
         builder
-            .HasOne(x => x.Festival)
+            .HasOne(x => x.Ticket)
             .WithMany(x => x.Bookings)
-            .HasForeignKey(x => x.FestivalId);
+            .HasForeignKey(x => x.TicketId);
     }
 }

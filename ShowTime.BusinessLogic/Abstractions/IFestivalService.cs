@@ -1,6 +1,7 @@
 using ShowTime.BusinessLogic.Dto.ArtistDto;
 using ShowTime.BusinessLogic.Dto.FestivalDto;
 using ShowTime.BusinessLogic.Dto.LineupDto;
+using ShowTime.BusinessLogic.Dto.TicketDto;
 using ShowTime.DataAccess.Models;
 
 namespace ShowTime.BusinessLogic.Abstractions;
@@ -17,4 +18,6 @@ public interface IFestivalService
     Task<List<FullFestivalDto>> GetAllFestivalsFullAsync();
     Task UpdateFestivalArtistsAsync(int festivalId, List<ArtistGetDto> updatedArtists);
     Task AddFestivalLineupAsync(int festivalId, LineupGetDto lineupDto);
+    Task AddTicketForFestivalAsync(int festivalId, TicketCreateDto ticketDto);
+    Task<List<TicketGetDto>> GetTicketsForFestivalAsync(int festivalId);
 }

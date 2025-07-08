@@ -10,6 +10,7 @@ public class ShowTimeDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Artist> Artist { get; set; }
     public DbSet<User> User { get; set; }
     public DbSet<Booking> Booking { get; set; }
+    public DbSet<Ticket> Ticket { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

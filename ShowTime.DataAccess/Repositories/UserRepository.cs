@@ -6,24 +6,74 @@ using ShowTime.DataAccess.Security;
 
 namespace ShowTime.DataAccess.Repositories;
 
-public class UserRepository(ShowTimeDbContext context) : BaseRepository<User>(context), IUserRepository
+public class UserRepository : BaseRepository<User>, IUserRepository
 {
-    public async Task<ICollection<Booking>?> GetUserBookingsAsync(int id)
+    private readonly ShowTimeDbContext _context;
+    private readonly IRepository<Ticket> _ticketRepository;
+    public UserRepository(ShowTimeDbContext context, IRepository<Ticket> ticketRepository)
+        : base(context)
+    {
+        _context = context;
+        _ticketRepository = ticketRepository;
+    }
+    public async Task<List<Booking>> GetUserBookingsAsync(int userId)
     {
         try
         {
             var user = await Context
                 .Set<User>()
                 .Include(u => u.Bookings)
-                .FirstOrDefaultAsync(u => u.Id == id);
+                .FirstOrDefaultAsync(u => u.Id == userId);
 
-            return user?.Bookings;
+            return user != null ? user.Bookings.ToList() : [];
         }
         catch (Exception e)
         {
-            throw new Exception($"Error trying to retrieve bookings for user with ID {id}: {e.Message}");
+            throw new Exception($"Error trying to retrieve bookings for user with ID {userId}: {e.Message}");
         }
     }
+
+    public async Task<List<Ticket>> GetUserTicketsAsync(int userId)
+    {
+        try
+        {
+            var bookings = await Context
+                .Set<Booking>()
+                .Include(b => b.Ticket)
+                .Where(b => b.UserId == userId)
+                .ToListAsync();
+
+            return bookings.Count > 0 ? bookings.Select(b => b.Ticket).ToList() : [];
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error trying to retrieve tickets for user with ID {userId}: {e.Message}");
+        }
+    }
+
+    public async Task DeleteUserBookingAsync(int userId, int ticketId)
+    {
+        try
+        {
+            var bookings = await Context
+                .Set<Booking>()
+                .Include(b => b.Ticket)
+                .Where(b => b.UserId == userId && b.TicketId == ticketId)
+                .FirstOrDefaultAsync();
+
+            if (bookings != null)
+            {
+                bookings.Ticket.Quantity += 1;
+                Context.Set<Booking>().Remove(bookings);
+                await Context.SaveChangesAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error trying to delete user booking with ID {userId}: {e.Message}");
+        }
+    }
+
 
     public async Task<User> LoginAsync(string email, string providedPassword)
     {
@@ -102,33 +152,6 @@ public class UserRepository(ShowTimeDbContext context) : BaseRepository<User>(co
         }
     }
 
-    public async Task BookTicketAsync(int userId, Booking booking)
-    {
-        try
-        {
-            var user = await Context
-                .Set<User>()
-                .Include(u => u.Bookings)
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
-            {
-                throw new UserNotLoggedException();
-            }
-
-            user.Bookings.Add(booking);
-            await Context.SaveChangesAsync();
-        }
-        catch (UserNotLoggedException e)
-        {
-            throw;
-        }
-        catch (Exception e)
-        {
-            throw new Exception($"Error trying to make booking for user with ID {userId}: {e.Message}");
-        }
-    }
-
     public async Task<int> GetUserIdByEmailAsync(string? email)
     {
         try
@@ -152,4 +175,50 @@ public class UserRepository(ShowTimeDbContext context) : BaseRepository<User>(co
             throw new Exception($"Error trying to get user with email {email}: {e.Message}");
         }
     }
+
+    public async Task BookTicketAsync(int userId, int ticketId)
+    {
+        try
+        {
+            var user = await Context
+                .Set<User>()
+                .Include(u => u.Bookings)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                throw new UserDoesntExistException();
+            }
+
+            var newBooking = new Booking()
+            {
+                UserId = userId,
+                TicketId = ticketId,
+            };
+
+            var ticket = await _ticketRepository.GetByIdAsync(ticketId);
+            if (ticket == null)
+            {
+                throw new EntityNotFoundException("Ticket type with id " + ticketId + " not found");
+            }
+
+            ticket.Quantity -= 1;
+            user.Bookings.Add(newBooking);
+            await Context.SaveChangesAsync();
+        }
+        catch (UserDoesntExistException e)
+        {
+            throw;
+        }
+        catch (EntityNotFoundException e)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error trying to book user with id {userId}: {e.Message}");
+        }
+    }
+    
+    
 }

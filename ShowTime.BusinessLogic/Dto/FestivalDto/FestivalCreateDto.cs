@@ -14,6 +14,4 @@ public class FestivalCreateDto
     public DateTime EndDate { get; set; } = DateTime.Now;
     [Required(ErrorMessage = "Splash art is required")]
     public string SplashArt { get; set; } = string.Empty;
-    [Required(ErrorMessage = "Capacity is required")]
-    public int Capacity { get; set; }
 }

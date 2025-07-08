@@ -1,0 +1,16 @@
+.confirmation-banner {
+    position: fixed;
+    top: 92%;
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+    background: #e6f8d1;
+    color: black;
+    font-weight: bold;
+    padding: 1rem 2rem;
+    border: 3px solid black;
+    box-shadow: 4px 4px 0 black;
+    z-index: 9999;
+    font-family: monospace;
+    font-size: 1.2rem;
+}

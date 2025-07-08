@@ -2,6 +2,7 @@ using ShowTime.BusinessLogic.Abstractions;
 using ShowTime.BusinessLogic.Dto.ArtistDto;
 using ShowTime.BusinessLogic.Dto.FestivalDto;
 using ShowTime.BusinessLogic.Dto.LineupDto;
+using ShowTime.BusinessLogic.Dto.TicketDto;
 using ShowTime.DataAccess.Models;
 using ShowTime.DataAccess.Repositories.Interfaces;
 
@@ -18,7 +19,6 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
             {
                 Id = f.Id,
                 Name = f.Name,
-                Capacity = f.Capacity,
                 EndDate = f.EndDate,
                 StartDate = f.StartDate,
                 Location = f.Location,
@@ -30,11 +30,21 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
                     Image = a.Image,
                     Genre = a.Genre,
                 }).ToList(),
-                Lineups = f.Lineups.Select(l => new LineupGetDto{
+                Lineups = f.Lineups.Select(l => new LineupGetDto
+                {
                     FestivalId = l.FestivalId,
                     ArtistId = l.ArtistId,
                     StartTime = l.StartTime,
                     Stage = l.Stage,
+                }).ToList(),
+                Tickets = f.Tickets.Select(t => new TicketGetDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    FestivalId = t.FestivalId,
+                    Price = t.Price,
+                    Quantity = t.Quantity,
+                    Type = t.Type,
                 }).ToList()
             }).ToList();
             
@@ -67,7 +77,15 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
             {
                 Id = f.Id,
                 Name = f.Name,
-                Capacity = f.Capacity,
+                Tickets = f.Tickets.Select(t => new TicketGetDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    FestivalId = t.FestivalId,
+                    Price = t.Price,
+                    Quantity = t.Quantity,
+                    Type = t.Type
+                }).ToList(),
                 EndDate = f.EndDate,
                 StartDate = f.StartDate,
                 Location = f.Location,
@@ -90,7 +108,15 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
             {
                 Id = festival.Id,
                 Name = festival.Name,
-                Capacity = festival.Capacity,
+                Tickets = festival.Tickets.Select(t => new TicketGetDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    FestivalId = t.FestivalId,
+                    Price = t.Price,
+                    Quantity = t.Quantity,
+                    Type = t.Type
+                }).ToList(),
                 EndDate = festival.EndDate,
                 StartDate = festival.StartDate,
                 Location = festival.Location,
@@ -110,7 +136,6 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
             var newFestival = new Festival
             {
                 Name = festivalCreateDto.Name,
-                Capacity = festivalCreateDto.Capacity,
                 EndDate = festivalCreateDto.EndDate,
                 StartDate = festivalCreateDto.StartDate,
                 Location = festivalCreateDto.Location,
@@ -132,7 +157,6 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
             if (festival != null)
             {
                 festival.Name = festivalUpdateDro.Name;
-                festival.Capacity = festivalUpdateDro.Capacity;
                 festival.EndDate = festivalUpdateDro.EndDate;
                 festival.StartDate = festivalUpdateDro.StartDate;
                 festival.Location = festivalUpdateDro.Location;
@@ -225,6 +249,47 @@ public class FestivalService(IFestivalRepository festivalRepository) : IFestival
         catch (Exception e)
         {
             throw new Exception($"Error while trying to add line up to the festival with id: {festivalId}: {e.Message}");
+        }
+    }
+
+    public async Task AddTicketForFestivalAsync(int festivalId, TicketCreateDto ticketDto)
+    {
+        try
+        {
+            var ticket = new Ticket()
+            {
+                FestivalId = festivalId,
+                Name = ticketDto.Name,
+                Type = ticketDto.Type,
+                Price = ticketDto.Price,
+                Quantity = ticketDto.Quantity,
+            };
+            await festivalRepository.AddTicketAsync(festivalId, ticket);
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error while trying to add new ticket for festival with Id: {festivalId}: {e.Message}");
+        }
+    }
+
+    public async Task<List<TicketGetDto>> GetTicketsForFestivalAsync(int festivalId)
+    {
+        try
+        {
+            var tickets = await festivalRepository.GetFestivalTicketsAsync(festivalId);
+            return tickets.Select(t => new TicketGetDto
+            {
+                FestivalId = festivalId,
+                Name = t.Name,
+                Type = t.Type,
+                Price = t.Price,
+                Quantity = t.Quantity,
+                Id = t.Id
+            }).ToList();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error trying to retrieve tickets for festival with id: {festivalId}: {e.Message}");
         }
     }
 }

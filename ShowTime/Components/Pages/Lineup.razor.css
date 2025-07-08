@@ -6,14 +6,36 @@
 }
 
 .lineup-header {
+    position: relative;
     max-width: 1400px;
-    margin: 3rem auto 3rem auto;
+    margin: 3rem auto;
+    height: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2rem;
-    position: relative;
 }
+
+.lineup-footer {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+
+.lineup-title {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 4px 4px 0 #ff6b6b;
+    margin: 0;
+    text-align: center;
+}
+
+
 
 .lineup-btn {
     background: #ffeb3b;
@@ -29,32 +51,19 @@
     box-shadow: 6px 6px 0 #000;
     transition: all 0.2s ease;
     white-space: nowrap;
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%) rotate(-2deg);
+    position: relative;
+    left: unset;
+    top: unset;
+    transform: rotate(-2deg);
 }
 
 .lineup-btn:hover {
     background: #ffd700;
-    transform: translateY(-50%) rotate(-2deg) scale(1.05);
     box-shadow: 8px 8px 0 #000;
 }
 
 .lineup-btn:active {
-    transform: translateY(-50%) rotate(-2deg) scale(0.95);
     box-shadow: 4px 4px 0 #000;
-}
-
-.lineup-title {
-    font-size: 4rem;
-    font-weight: 900;
-    color: #000;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    text-shadow: 4px 4px 0 #ff6b6b;
-    transform: rotate(-2deg);
-    margin: 0;
 }
 
 .day-section {
@@ -223,4 +232,51 @@
     font-size: 1.2rem;
     font-weight: 700;
     color: #666;
+}
+
+.sticky-form button.btn {
+    margin-top: 2rem;
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    border: 4px solid #000000;
+    color: #000000;
+    font-weight: 900;
+    font-size: 1.2rem;
+    padding: 1rem 2rem;
+    font-family: 'Arial Black', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 8px 8px 0 #000000;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+
+.sticky-form button.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+.sticky-form button.btn:hover {
+    background: linear-gradient(135deg, #00ff66, #00aa55);
+    box-shadow: 12px 12px 0 #000000;
+    transform: translate(-2px, -2px);
+    text-shadow: 2px 2px 0 #ffffff;
+}
+
+.sticky-form button.btn:hover::before {
+    left: 100%;
+}
+
+.sticky-form button.btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 4px 4px 0 #000000;
+    background: linear-gradient(135deg, #00dd77, #009944);
 }

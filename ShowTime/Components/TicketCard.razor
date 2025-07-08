@@ -1,0 +1,25 @@
+@using ShowTime.BusinessLogic.Dto.TicketDto
+@using Microsoft.AspNetCore.Components
+
+<div class="ticket-card">
+    <div class="ticket-header">
+        <h2>@Ticket.Name</h2>
+        <span class="ticket-type">@Ticket.Type</span>
+    </div>
+    <div class="ticket-body">
+        <p><strong>Price:</strong> @Ticket.Price.ToString("C")</p>
+        <p><strong>Quantity:</strong> @Ticket.Quantity</p>
+    </div>
+    <button class="buy-button" @onclick="OnBuyClicked">Buy</button>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public required TicketGetDto Ticket { get; set; }
+    [Parameter] public EventCallback<TicketGetDto> OnBuy { get; set; }
+
+    private async Task OnBuyClicked()
+    {
+        if (OnBuy.HasDelegate)
+            await OnBuy.InvokeAsync(Ticket);
+    }
+}

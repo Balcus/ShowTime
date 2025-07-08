@@ -1,0 +1,64 @@
+@page "/festivals/{festivalId}/tickets"
+@using System.Security.Claims
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.TicketDto
+@inject IFestivalService FestivalService
+@inject IUserService UserService
+@rendermode InteractiveServer
+
+<PageTitle>Tickets</PageTitle>
+
+<div class="ticket-container">
+    @foreach (var ticket in FestivalTickets)
+    {
+        <TicketCard Ticket="ticket" OnBuy="HandleBuy" />
+    }
+    
+    @if (_showConfirmation)
+    {
+        <div class="confirmation-banner">
+            @_confirmationMessage
+        </div>
+    }
+
+</div>
+
+@code {
+    private int _festivalId;
+    private int _userId;
+    private bool _showConfirmation;
+    private string _confirmationMessage = string.Empty;
+    [Parameter] public required string FestivalId { get; set; }
+    [CascadingParameter] private Task<AuthenticationState> Cookies { get; set; } = null!;
+    private List<TicketGetDto> FestivalTickets { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _festivalId = int.Parse(FestivalId);
+        FestivalTickets = await FestivalService.GetTicketsForFestivalAsync(_festivalId);
+        var result = await Cookies;
+        var userEmail = result.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Email)?.Value;
+
+        if (userEmail == null)
+        {
+            throw new Exception("Could not retrieve email from cookies");
+        }
+
+        _userId = await UserService.GetUserIdByEmailAsync(userEmail);
+    }
+
+    private async Task HandleBuy(TicketGetDto ticket)
+    {
+        await UserService.BookTicketAsync(_userId, ticket.Id);
+
+        _confirmationMessage = $"✅ Ticket for {ticket.Type} booked!";
+        _showConfirmation = true;
+
+        StateHasChanged();
+
+        await Task.Delay(2000);
+        _showConfirmation = false;
+        StateHasChanged();
+    }
+
+}

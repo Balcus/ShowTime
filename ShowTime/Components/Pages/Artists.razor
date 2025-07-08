@@ -86,8 +86,8 @@
 
 @code {
     private int _editArtistId;
-    private bool _showAddDialog = false;
-    private bool _showUpdateDialog = false;
+    private bool _showAddDialog;
+    private bool _showUpdateDialog;
     private IList<ArtistGetDto> _artists = new List<ArtistGetDto>();
     [SupplyParameterFromForm]
     private ArtistCreateDto NewArtist { get; set; } = new();

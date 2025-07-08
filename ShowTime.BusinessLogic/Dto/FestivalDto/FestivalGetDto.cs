@@ -1,5 +1,6 @@
 using ShowTime.BusinessLogic.Dto.ArtistDto;
 using ShowTime.BusinessLogic.Dto.LineupDto;
+using ShowTime.BusinessLogic.Dto.TicketDto;
 
 namespace ShowTime.BusinessLogic.Dto.FestivalDto;
 
@@ -11,5 +12,6 @@ public class FestivalGetDto
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string SplashArt { get; set; } = string.Empty;
-    public int Capacity { get; set; }
+    public int TotalAvailableTickets => Tickets.Sum(t => t.Quantity);
+    public ICollection<TicketGetDto> Tickets { get; set; } = new List<TicketGetDto>();
 }
