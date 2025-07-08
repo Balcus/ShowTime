@@ -14,20 +14,14 @@
         <TicketCard Ticket="ticket" OnBuy="HandleBuy" />
     }
     
-    @if (_showConfirmation)
-    {
-        <div class="confirmation-banner">
-            @_confirmationMessage
-        </div>
-    }
-
+    <Notification @ref="_notificationBanner" />
 </div>
 
 @code {
     private int _festivalId;
     private int _userId;
-    private bool _showConfirmation;
-    private string _confirmationMessage = string.Empty;
+    private Notification _notificationBanner = null!;
+    
     [Parameter] public required string FestivalId { get; set; }
     [CascadingParameter] private Task<AuthenticationState> Cookies { get; set; } = null!;
     private List<TicketGetDto> FestivalTickets { get; set; } = [];
@@ -49,16 +43,20 @@
 
     private async Task HandleBuy(TicketGetDto ticket)
     {
-        await UserService.BookTicketAsync(_userId, ticket.Id);
-
-        _confirmationMessage = $"✅ Ticket for {ticket.Type} booked!";
-        _showConfirmation = true;
-
-        StateHasChanged();
-
-        await Task.Delay(2000);
-        _showConfirmation = false;
-        StateHasChanged();
+        try
+        {
+            await UserService.BookTicketAsync(_userId, ticket.Id);
+            await _notificationBanner.ShowNotificationAsync(
+                $"✅ Ticket for {ticket.Type} booked!", 
+                "#e6f8d1"
+            );
+        }
+        catch (Exception ex)
+        {
+            await _notificationBanner.ShowNotificationAsync(
+                $"❌ Failed to book ticket: {ex.Message}", 
+                "#ffebee"
+            );
+        }
     }
-
 }

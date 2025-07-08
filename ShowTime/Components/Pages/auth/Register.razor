@@ -47,10 +47,12 @@
     </div>
 </div>
 
+<Notification @ref="_notification" />
 
 @code {
     private LoginDto RegisteredUser { get; set; } = new();
     private string ErrorMessage { get; set; } = string.Empty;
+    private Notification _notification = null!;
 
     private void ClearErrorMessage()
     {
@@ -71,11 +73,17 @@
         {
             await UserService.RegisterUserAsync(user);
             RegisteredUser = new LoginDto();
+            await _notification.ShowNotificationAsync("✅ Registration successful! Redirecting to login...", "#e6f8d1");
+            await Task.Delay(1500);
             NavigationManager.NavigateTo("/login");
         }
         catch (UserAlreadyExistsException e)
         {
             ErrorMessage = "A user with this email already exists";
+        }
+        catch (Exception e)
+        {
+            await _notification.ShowNotificationAsync("❌ There was an error while registering user. Please try registering again");
         }
     }
 }

@@ -1,0 +1,114 @@
+@page "/user"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.BookingDto
+@using ShowTime.BusinessLogic.Dto.TicketDto
+@using ShowTime.DataAccess.Exceptions
+@inject NavigationManager Navigation
+@inject IUserService UserService
+@attribute [Authorize(Roles = "User")]
+@rendermode InteractiveServer
+
+<PageTitle>User Profile</PageTitle>
+
+<div class="user-wrapper">
+    <div class="page-content">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-icon">👤</div>
+                <h2 class="profile-title">PROFILE</h2>
+            </div>
+            <div class="profile-body">
+                @if (UserBookings.Count > 0)
+                {
+                    <p>Total Bookings: @UserBookings.Count</p>
+                    <table class="ticket-table">
+                        <thead>
+                        <tr>
+                            <th>Ticket Name</th>
+                            <th>Ticket Type</th>
+                            <th>Ticket Price</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var ticket in UserTickets)
+                        {
+                            <tr>
+                                <td>@ticket.Name</td>
+                                <td>@ticket.Type</td>
+                                <td>@ticket.Price</td>
+                                <td><button @onclick="@(async () => await DeleteBooking(@ticket.Id))">🗑️</button></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="no-bookings">
+                        <p>You do not currently have any bookings</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+            
+    <div class="button-actions">
+        <button class="logout-btn" @onclick="LogOut">
+            <span class="btn-text">LOG OUT</span>
+        </button>
+    </div>
+</div>
+
+<Notification @ref="_notification" />
+
+@code {
+    private int _userId;
+    [CascadingParameter] private Task<AuthenticationState> Cookies { get; set; } = null!;
+    private List<TicketGetDto> UserTickets { get; set; } = [];
+    private List<BookingGetDto> UserBookings { get; set; } = [];
+    private Notification _notification = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var result = await Cookies;
+            var userEmail = result.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Email)?.Value;
+
+            if (userEmail == null)
+            {
+                throw new CookieException();
+            }
+
+            _userId = await UserService.GetUserIdByEmailAsync(userEmail);
+            UserTickets = await UserService.GetUserTickets(_userId);
+            UserBookings = await UserService.GetUserBookings(_userId);
+        }
+        catch (CookieException e)
+        {
+            await _notification.ShowNotificationAsync($"❌ There was an error reading data from cookies. Please make sure you are logged in!");
+        }
+    }
+
+    private void LogOut()
+    {
+        Navigation.NavigateTo("/logout", forceLoad: true);
+    }
+
+    private async Task DeleteBooking(int ticketId)
+    {
+        try
+        {
+            await UserService.DeleteUserBookingAsync(_userId, ticketId);
+            UserTickets = await UserService.GetUserTickets(_userId);
+            UserBookings = await UserService.GetUserBookings(_userId);
+        }
+        catch (Exception ex)
+        {
+            await _notification.ShowNotificationAsync($"❌ Failed to delete booking: {ex.Message}");
+        }
+    }
+}

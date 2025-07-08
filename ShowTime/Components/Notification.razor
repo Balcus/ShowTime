@@ -1,0 +1,59 @@
+@if (IsVisible)
+{
+    <div class="confirmation-banner" style="background: @BackgroundColor;">
+        @Message
+    </div>
+}
+
+@code {
+    [Parameter] public string Message { get; set; } = string.Empty;
+    [Parameter] public string BackgroundColor { get; set; } = "#f799a7";
+    [Parameter] public bool IsVisible { get; set; } = false;
+    [Parameter] public int DisplayDurationMs { get; set; } = 2000;
+    [Parameter] public EventCallback OnHidden { get; set; }
+
+    private CancellationTokenSource? _cancellationTokenSource;
+
+    public async Task ShowNotificationAsync(string message, string? backgroundColor = null)
+    {
+        if (_cancellationTokenSource != null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+        }
+        
+        _cancellationTokenSource = new CancellationTokenSource();
+
+        Message = message;
+        BackgroundColor = backgroundColor ?? "#f799a7";
+        IsVisible = true;
+        StateHasChanged();
+
+        try
+        {
+            await Task.Delay(DisplayDurationMs, _cancellationTokenSource.Token);
+            IsVisible = false;
+            StateHasChanged();
+            
+            if (OnHidden.HasDelegate)
+            {
+                await OnHidden.InvokeAsync();
+            }
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
+
+    public void HideNotification()
+    {
+        _cancellationTokenSource?.Cancel();
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+    }
+}

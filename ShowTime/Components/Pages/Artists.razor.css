@@ -1,5 +1,6 @@
 .page {
     min-height: 100vh;
+    background-color: #F4F8D3;
 }
 
 .content {
@@ -96,8 +97,7 @@ ul li button {
 }
 
 .add-container button.add {
-    background-color: #EAB8FF;
-    color: black;
+    background-color: white;
     border: 4px solid black;
     padding: 0;
     font-size: 31px;
@@ -113,8 +113,9 @@ ul li button {
 }
 
 .add-container button.add:hover {
-    background-color: #d77efc;
+    background-color: snow;
     box-shadow: 6px 6px 0 black;
+    text-shadow: 2px 2px 0 darkgray;
 }
 
 .add-container button.add:active {
@@ -167,7 +168,7 @@ ul li button {
 }
 
 .sticky-form button.btn:hover {
-    background-color: #65b9e6;
+    background-color: #68f685;
     box-shadow: 6px 6px 0 black;
 }
 

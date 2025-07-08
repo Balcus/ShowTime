@@ -39,7 +39,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 900;
-    box-shadow: 4px 4px 0 #000;
+    box-shadow: 4px 4px 0 darkgray;
     position: relative;
     overflow: hidden;
 }
@@ -48,8 +48,8 @@
     background: #ffffff;
     color: #000;
     transform: translate(-3px, -3px);
-    box-shadow: 6px 6px 0 #000;
-    text-shadow: 2px 2px 0 #ff6b6b;
+    box-shadow: 6px 6px 0 darkgray;
+    text-shadow: 2px 2px 0 darkgray;
 }
 
 .add-btn button:hover::before {
@@ -58,7 +58,7 @@
 
 .add-btn button:active {
     transform: translate(4px, 4px);
-    box-shadow: 4px 4px 0 #000;
+    box-shadow: 4px 4px 0 darkgray;
     background: #ffffff;
 }
 
@@ -112,7 +112,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;
-    box-shadow: 3px 3px 0 #000;
+    box-shadow: 3px 3px 0 darkgray;
 }
 
 .view-btn {
@@ -136,12 +136,12 @@
 
 .action-btn:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0 #000;
+    box-shadow: 5px 5px 0 darkgray;
 }
 
 .action-btn:active {
     transform: translate(0, 0);
-    box-shadow: 2px 2px 0 #000;
+    box-shadow: 2px 2px 0 darkgray;
 }
 
 .festival-content {
@@ -362,7 +362,7 @@
     font-family: 'Arial Black', Arial, sans-serif;
     text-transform: uppercase;
     letter-spacing: 2px;
-    box-shadow: 8px 8px 0 #000000;
+    box-shadow: 8px 8px 0 #000;
     cursor: pointer;
     transition: all 0.1s ease;
     position: relative;
@@ -383,7 +383,7 @@
 
 .sticky-form button.btn:hover {
     background: linear-gradient(135deg, #00ff66, #00aa55);
-    box-shadow: 12px 12px 0 #000000;
+    box-shadow: 12px 12px 0 #000;
     transform: translate(-2px, -2px);
     text-shadow: 2px 2px 0 #ffffff;
 }
@@ -394,7 +394,7 @@
 
 .sticky-form button.btn:active {
     transform: translate(4px, 4px);
-    box-shadow: 4px 4px 0 #000000;
+    box-shadow: 4px 4px 0 #000;
     background: linear-gradient(135deg, #00dd77, #009944);
 }
 
@@ -415,7 +415,7 @@ input.input-validation-error {
     font-family: 'Arial Black', Arial, sans-serif;
     text-transform: uppercase;
     letter-spacing: 2px;
-    box-shadow: 8px 8px 0 #000000;
+    box-shadow: 8px 8px 0 #000;
     cursor: pointer;
     transition: all 0.1s ease;
     position: relative;
@@ -424,12 +424,12 @@ input.input-validation-error {
 }
 
 .update-artist-btn:hover {
-    box-shadow: 12px 12px 0 #000000;
+    box-shadow: 12px 12px 0 #000;
     transform: translate(-2px, -2px);
     text-shadow: 2px 2px 0 #ffffff;
 }
 
 .update-artist-btn:active {
     transform: translate(4px, 4px);
-    box-shadow: 4px 4px 0 #000000;
+    box-shadow: 4px 4px 0 #000;
 }

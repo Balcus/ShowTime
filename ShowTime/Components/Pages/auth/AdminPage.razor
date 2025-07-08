@@ -1,0 +1,110 @@
+@page "/admin"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.UserDto
+@using ShowTime.DataAccess.Exceptions
+@inject NavigationManager Navigation
+@inject IUserService UserService
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+
+<PageTitle>Admin Dashboard</PageTitle>
+
+<div class="admin-wrapper">
+    <div class="admin-panel">
+        <div class="admin-header">
+            <div class="admin-icon">⚙️</div>
+            <h2 class="admin-title">ADMIN DASHBOARD</h2>
+        </div>
+                
+        @if (Users.Count == 0)
+        {
+            <p class="no-users">No users found.</p>
+        }
+        else
+        {
+            <div class="user-table-container">
+                <table class="user-table">
+                    <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Bookings</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var user in Users)
+                    {
+                        <tr>
+                            <td>@user.Email</td>
+                            <td>@user.Role</td>
+                            <td>
+                                @if (user.Bookings.Count == 0)
+                                {
+                                    <span class="no-bookings">No bookings</span>
+                                }
+                                else
+                                {
+                                    <ul class="booking-list">
+                                        @foreach (var booking in user.Bookings)
+                                        {
+                                            <li>
+                                                <strong>FestivalId:</strong> @booking.TicketId,
+                                                <strong>UserId:</strong> @booking.UserId,
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+            
+    <div class="button-actions">
+        <button class="logout-btn" @onclick="LogOut">
+            <span class="btn-text">LOG OUT</span>
+        </button>
+    </div>
+</div>
+
+<Notification @ref="_notification" />
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> Cookies { get; set; } = null!;
+    private List<UserGetDto> Users { get; set; } = [];
+    private Notification _notification = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var result = await Cookies;
+            var userEmail = result.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Email)?.Value;
+
+            if (userEmail == null)
+            {
+                throw new CookieException();
+            }
+
+            Users = await UserService.GetAllUsersAsync();
+        }
+        catch (CookieException e)
+        {
+            await _notification.ShowNotificationAsync("❌ There was an error retrieving data from cookies, Please retry logging in");
+        }
+        catch (Exception e)
+        {
+            await _notification.ShowNotificationAsync("❌ There was an error retrieving users from database");
+        }
+    }
+
+    private void LogOut()
+    {
+        Navigation.NavigateTo("/logout", forceLoad: true);
+    }
+}

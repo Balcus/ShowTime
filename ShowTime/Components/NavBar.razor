@@ -13,30 +13,31 @@
     </div>
 
     <div class="navbar-right">
-            <AuthorizeView>
-                <NotAuthorized><button class="user-profile-button" @onclick="NavigateToLogIn">👤 LOG IN</button></NotAuthorized>
-                <Authorized><button class="user-profile-button" @onclick="NavigateToUserProfile">👤 PROFILE</button></Authorized>
-            </AuthorizeView>
+        <AuthorizeView>
+            <NotAuthorized>
+                <button class="user-profile-button" @onclick="NavigateToLogIn">👤 LOG IN</button>
+            </NotAuthorized>
+            <Authorized>
+                @{
+                    var isAdmin = context.User.IsInRole("Admin");
+                    var buttonText = isAdmin ? "⚙️ DASHBOARD" : "🛒 CART";
+                }
+                <button class="user-profile-button" @onclick="() => NavigateToProfile(isAdmin)">
+                    @buttonText
+                </button>
+            </Authorized>
+        </AuthorizeView>
     </div>
 </nav>
 
 @code {
-    private NavigationManager NavigationManager { get; set; } = default!;
-
     private void NavigateToLogIn()
     {
         Navigation.NavigateTo("/login");
     }
 
-    private void NavigateToLogOut()
+    private void NavigateToProfile(bool isAdmin)
     {
-        Navigation.NavigateTo("/logout", forceLoad: true);
+        Navigation.NavigateTo(isAdmin ? "/admin" : "/user");
     }
-
-
-    private void NavigateToUserProfile()
-    {
-        Navigation.NavigateTo("/user");
-    }
-
 }

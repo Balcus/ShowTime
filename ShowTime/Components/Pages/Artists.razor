@@ -3,9 +3,6 @@
 @using ShowTime.BusinessLogic.Dto.ArtistDto
 @inject IArtistService ArtistService;
 @rendermode InteractiveServer
-@* forbid a full page *@
-@* @attribute [StreamRendering] *@
-@* @attribute [Authorize(Roles = "Admin")] *@
 <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet">
 
 <PageTitle>Artists</PageTitle>
@@ -82,12 +79,13 @@
     </div>
 </div>
 
-
+<Notification @ref="_notification" />
 
 @code {
     private int _editArtistId;
     private bool _showAddDialog;
     private bool _showUpdateDialog;
+    private Notification _notification = null!;
     private IList<ArtistGetDto> _artists = new List<ArtistGetDto>();
     [SupplyParameterFromForm]
     private ArtistCreateDto NewArtist { get; set; } = new();
@@ -114,20 +112,41 @@
     
     protected override async Task OnInitializedAsync()
     {
-        _artists = await ArtistService.GetAllArtistsAsync();
+        try
+        {
+            _artists = await ArtistService.GetAllArtistsAsync();
+        }
+        catch (Exception e)
+        {
+            await _notification.ShowNotificationAsync($"❌ There was an error retrieving artists from database. Please try again later and report the issue");
+        }
     }
 
     private async Task AddArtistAsync()
     {
-        await ArtistService.AddArtistAsync(NewArtist);
         NewArtist = new ArtistCreateDto();
-        _artists = await ArtistService.GetAllArtistsAsync();
+        try
+        {
+            await ArtistService.AddArtistAsync(NewArtist);
+            _artists = await ArtistService.GetAllArtistsAsync();
+        }
+        catch (Exception e)
+        {
+            await _notification.ShowNotificationAsync($"❌ There was an error adding an artist to the database. Please try again later and report the issue");
+        }
     }
 
     private async Task DeleteArtistAsync(int id)
     {
-        await ArtistService.DeleteArtistAsync(id);
-        _artists = await ArtistService.GetAllArtistsAsync();
+        try
+        {
+            await ArtistService.DeleteArtistAsync(id);
+            _artists = await ArtistService.GetAllArtistsAsync();
+        }
+        catch (Exception e)
+        {
+            await _notification.ShowNotificationAsync($"❌ There was an error removing an artist from the database. Please try again later and report the issue");
+        }
 
     }
 
@@ -150,9 +169,16 @@
 
     private async Task SubmitUpdatedArtistAsync()
     {
-        await ArtistService.UpdateArtistAsync(_editArtistId, UpdatedArtist);
-        UpdatedArtist = new ArtistCreateDto();
-        _artists = await ArtistService.GetAllArtistsAsync();
         _showUpdateDialog = false;
+        try
+        {
+            await ArtistService.UpdateArtistAsync(_editArtistId, UpdatedArtist);
+            UpdatedArtist = new ArtistCreateDto();
+            _artists = await ArtistService.GetAllArtistsAsync();
+        }
+        catch (Exception e)
+        {
+            await _notification.ShowNotificationAsync($"❌ There was an error while updating an artist. Please try again later and report the issue");
+        }
     }
 }

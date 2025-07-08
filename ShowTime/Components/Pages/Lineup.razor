@@ -2,18 +2,16 @@
 @inject IFestivalService FestivalService
 @using ShowTime.BusinessLogic.Abstractions
 @using ShowTime.BusinessLogic.Dto.ArtistDto
-@using ShowTime.BusinessLogic.Dto.BookingDto
 @using ShowTime.BusinessLogic.Dto.FestivalDto
 @using ShowTime.BusinessLogic.Dto.LineupDto
 @using ShowTime.BusinessLogic.Dto.TicketDto
-@using ShowTime.BusinessLogic.Dto.UserDto
 @using ShowTime.DataAccess.Enums
 @inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
 <PageTitle>Festival lineup</PageTitle>
-@* Think we need a new table with ticket variants *@
+
 <div class="lineup-container">
     <div class="lineup-header">
         <h1 class="lineup-title">Festival Lineup</h1>
@@ -170,13 +168,8 @@
     private bool _showAddDialog;
     private bool _showTicketDialog;
     private int _festivalId;
-    
-    // private string? _userEmail;
-    // private int _userId;
-    
-    private UserGetDto User { get; set; } = new();
+
     private LineupGetDto NewLineup { get; set; } = new();
-    private BookingGetDto NewBooking { get; set; } = new();
     private TicketCreateDto NewTicket { get; set; } = new();
     private FestivalGetDto Festival { get; set; } = new();
     private List<TicketGetDto> FestivalTickets { get; set; } = [];

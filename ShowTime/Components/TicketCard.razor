@@ -2,15 +2,20 @@
 @using Microsoft.AspNetCore.Components
 
 <div class="ticket-card">
-    <div class="ticket-header">
-        <h2>@Ticket.Name</h2>
-        <span class="ticket-type">@Ticket.Type</span>
+    <div class="ticket-main">
+        <div class="ticket-header">
+            <h2>@Ticket.Name</h2>
+            <span class="ticket-type">@Ticket.Type</span>
+        </div>
+        <button class="buy-button" @onclick="OnBuyClicked">Purchase</button>
     </div>
-    <div class="ticket-body">
-        <p><strong>Price:</strong> @Ticket.Price.ToString("C")</p>
-        <p><strong>Quantity:</strong> @Ticket.Quantity</p>
+    
+    <div class="ticket-stub">
+        <div class="ticket-price">@Ticket.Price.ToString("C")</div>
+        <div class="ticket-quantity">QTY: @Ticket.Quantity</div>
     </div>
-    <button class="buy-button" @onclick="OnBuyClicked">Buy</button>
+    
+    <div class="ticket-barcode"></div>
 </div>
 
 @code {
