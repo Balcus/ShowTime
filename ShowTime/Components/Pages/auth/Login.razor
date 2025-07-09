@@ -55,14 +55,12 @@
     </div>
 </div>
 
-<Notification @ref="_notification" />
-
 @code {
     [SupplyParameterFromForm] private LoginDto LoginInfo { get; set; } = new();
     private string ErrorMessage { get; set; } = string.Empty;
+
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = null!;
-    private Notification _notification = null!;
 
     private void ClearErrorMessage()
     {
@@ -83,10 +81,12 @@
             };
 
             var claimIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
 
             var httpContext = HttpContextAccessor.HttpContext;
             if (httpContext != null)
             {
+                await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
                 HttpContext.Response.Redirect("/");
             }
             else
@@ -104,7 +104,7 @@
         }
         catch (Exception e)
         {
-            await _notification.ShowNotificationAsync("❌ There was an error while trying to authenticate, Please try again");
+            Console.WriteLine($"Login failed: {e.Message}");
         }
     }
 }

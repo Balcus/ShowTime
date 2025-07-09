@@ -11,7 +11,7 @@
 <div class="ticket-container">
     @foreach (var ticket in FestivalTickets)
     {
-        <TicketCard Ticket="ticket" OnBuy="HandleBuy" />
+        <TicketCard Ticket="ticket" OnBuy="HandleBuy" OnEdit="HandleEdit"/>
     }
     
     <Notification @ref="_notificationBanner" />
@@ -57,6 +57,18 @@
                 $"❌ Failed to book ticket: {ex.Message}", 
                 "#ffebee"
             );
+        }
+    }
+
+    private async Task HandleEdit()
+    {
+        try
+        {
+            
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Exception raised while editing ticket");
         }
     }
 }

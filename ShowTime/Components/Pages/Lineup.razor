@@ -78,6 +78,7 @@
         <AuthorizeView Roles="Admin">
             <button @onclick="@(() => _showAddDialog = true)" class="lineup-btn">📌 Add Lineup</button>
             <button @onclick="@(() => _showTicketDialog = true)" class="lineup-btn">🎫 Add Ticket</button>
+            <button @onclick="NavigateToTickets" class="lineup-btn">📌 View Tickets</button>
         </AuthorizeView>
         <AuthorizeView Roles="User">
             <button @onclick="NavigateToTickets" class="lineup-btn">📌 Book Ticket</button>

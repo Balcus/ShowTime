@@ -1,5 +1,4 @@
 @using ShowTime.BusinessLogic.Dto.TicketDto
-@using Microsoft.AspNetCore.Components
 
 <div class="ticket-card">
     <div class="ticket-main">
@@ -7,7 +6,12 @@
             <h2>@Ticket.Name</h2>
             <span class="ticket-type">@Ticket.Type</span>
         </div>
-        <button class="buy-button" @onclick="OnBuyClicked">Purchase</button>
+        <AuthorizeView Roles="User">
+            <button class="buy-button" @onclick="OnBuyClicked">Purchase</button>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+            <button class="buy-button" @onclick="OnEditClicked">Edit</button>
+        </AuthorizeView>
     </div>
     
     <div class="ticket-stub">
@@ -21,8 +25,15 @@
 @code {
     [Parameter, EditorRequired] public required TicketGetDto Ticket { get; set; }
     [Parameter] public EventCallback<TicketGetDto> OnBuy { get; set; }
+    [Parameter] public EventCallback<TicketCreateDto> OnEdit { get; set; }
 
     private async Task OnBuyClicked()
+    {
+        if (OnBuy.HasDelegate)
+            await OnBuy.InvokeAsync(Ticket);
+    }
+
+    private async Task OnEditClicked()
     {
         if (OnBuy.HasDelegate)
             await OnBuy.InvokeAsync(Ticket);
