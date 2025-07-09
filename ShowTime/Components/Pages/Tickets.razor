@@ -3,6 +3,7 @@
 @using ShowTime.BusinessLogic.Abstractions
 @using ShowTime.BusinessLogic.Dto.TicketDto
 @inject IFestivalService FestivalService
+@inject ITicketService TicketService
 @inject IUserService UserService
 @rendermode InteractiveServer
 
@@ -11,8 +12,46 @@
 <div class="ticket-container">
     @foreach (var ticket in FestivalTickets)
     {
-        <TicketCard Ticket="ticket" OnBuy="HandleBuy" OnEdit="HandleEdit"/>
+        <div class="ticket-card">
+            <div class="ticket-main">
+                <div class="ticket-header">
+                    <h2>@ticket.Name</h2>
+                    <span class="ticket-type">@ticket.Type</span>
+                </div>
+                <AuthorizeView Roles="User">
+                    <button class="buy-button" @onclick="(async () => await HandleBuy(ticket))">Purchase</button>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin">
+                    <button class="buy-button" @onclick="(() => ShowEditDialog(ticket))">Edit Ticket</button>
+                </AuthorizeView>
+            </div>
+    
+            <div class="ticket-stub">
+                <div class="ticket-price">@ticket.Price.ToString("C")</div>
+                <div class="ticket-quantity">QTY: @ticket.Quantity</div>
+            </div>
+    
+            <div class="ticket-barcode"></div>
+        </div>
     }
+    
+    <Dialog Title="Update Artist" Opened="_showEditDialog" CloseButtonClicked="@(() => _showEditDialog = false)">
+        <BodyContent>
+            <div class="sticky-form">
+                <EditForm Model="EditedTicket" OnValidSubmit="(async () => await SubmitTicketEditAsync(_editedTicketId))">
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
+                    <label>New Name:</label>
+                    <InputText @bind-Value="EditedTicket.Name" class="form-control"/>
+                    <label>New Price:</label>
+                    <InputNumber @bind-Value="EditedTicket.Price" class="form-control"/>
+                    <label>New Quantity:</label>
+                    <InputNumber @bind-Value="EditedTicket.Quantity" class="form-control"/>
+                    <button class="btn btn-primary">Update Ticket</button>
+                </EditForm>
+            </div>
+        </BodyContent>
+    </Dialog>
     
     <Notification @ref="_notificationBanner" />
 </div>
@@ -21,10 +60,13 @@
     private int _festivalId;
     private int _userId;
     private Notification _notificationBanner = null!;
+    private bool _showEditDialog;
+    private int _editedTicketId;
     
     [Parameter] public required string FestivalId { get; set; }
     [CascadingParameter] private Task<AuthenticationState> Cookies { get; set; } = null!;
     private List<TicketGetDto> FestivalTickets { get; set; } = [];
+    private TicketCreateDto EditedTicket { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -39,6 +81,10 @@
         }
 
         _userId = await UserService.GetUserIdByEmailAsync(userEmail);
+        EditedTicket = new TicketCreateDto()
+        {
+            FestivalId = _festivalId,
+        };
     }
 
     private async Task HandleBuy(TicketGetDto ticket)
@@ -50,6 +96,7 @@
                 $"✅ Ticket for {ticket.Type} booked!", 
                 "#e6f8d1"
             );
+            FestivalTickets = await FestivalService.GetTicketsForFestivalAsync(_festivalId);
         }
         catch (Exception ex)
         {
@@ -60,15 +107,35 @@
         }
     }
 
-    private async Task HandleEdit()
+    private async Task SubmitTicketEditAsync(int ticketId)
     {
         try
         {
-            
-        }
-        catch (Exception e)
+            await TicketService.UpdateTicketAsync(_editedTicketId, EditedTicket);
+            _showEditDialog = false;
+            EditedTicket = new TicketCreateDto()
+            {
+                FestivalId = _festivalId
+            };
+            FestivalTickets = await FestivalService.GetTicketsForFestivalAsync(_festivalId);
+        }catch (Exception ex)
         {
-            throw new Exception($"Exception raised while editing ticket");
+            Console.WriteLine(ex.Message);
+            await _notificationBanner.ShowNotificationAsync(
+                $"❌ Failed to edit ticket", 
+                "#ffebee"
+            );
         }
+    }
+
+    private void ShowEditDialog(TicketGetDto ticket)
+    {
+        EditedTicket.Name = ticket.Name;
+        EditedTicket.Type = ticket.Type;
+        EditedTicket.Type = ticket.Type;
+        EditedTicket.Price = ticket.Price;
+        EditedTicket.Quantity = ticket.Quantity;
+        _editedTicketId = ticket.Id;
+        _showEditDialog = true;
     }
 }

@@ -35,13 +35,17 @@
                         <tbody>
                         @foreach (var ticket in UserTickets)
                         {
+                           _total = _total + ticket.Price;
                             <tr>
                                 <td>@ticket.Name</td>
                                 <td>@ticket.Type</td>
-                                <td>@ticket.Price</td>
+                                <td>@ticket.Price.ToString("C")</td>
                                 <td><button @onclick="@(async () => await DeleteBooking(@ticket.Id))">🗑️</button></td>
                             </tr>
                         }
+                        <tr>
+                            <td>TOTAL: @_total.ToString("C")</td>
+                        </tr>
                         </tbody>
                     </table>
                 }
@@ -65,6 +69,7 @@
 <Notification @ref="_notification" />
 
 @code {
+    private double _total;
     private int _userId;
     [CascadingParameter] private Task<AuthenticationState> Cookies { get; set; } = null!;
     private List<TicketGetDto> UserTickets { get; set; } = [];
@@ -77,6 +82,7 @@
         {
             var result = await Cookies;
             var userEmail = result.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Email)?.Value;
+            _total = 0;
 
             if (userEmail == null)
             {

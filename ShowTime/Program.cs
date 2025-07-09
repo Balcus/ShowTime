@@ -23,6 +23,7 @@ builder.Services.AddTransient<IRepository<Ticket>, BaseRepository<Ticket>>();
 builder.Services.AddTransient<IArtistService, ArtistService>();
 builder.Services.AddTransient<IFestivalService, FestivalService>();
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<ITicketService, TicketService>();
 
 builder.Services.AddHttpContextAccessor();
 
