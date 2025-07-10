@@ -74,7 +74,7 @@
             await UserService.RegisterUserAsync(user);
             RegisteredUser = new LoginDto();
             await _notification.ShowNotificationAsync("✅ Registration successful! Redirecting to login...", "#e6f8d1");
-            await Task.Delay(1500);
+            await Task.Delay(1000);
             NavigationManager.NavigateTo("/login");
         }
         catch (UserAlreadyExistsException e)

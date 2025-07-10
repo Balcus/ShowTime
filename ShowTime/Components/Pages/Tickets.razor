@@ -1,6 +1,7 @@
 @page "/festivals/{festivalId}/tickets"
 @using System.Security.Claims
 @using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dto.FestivalDto
 @using ShowTime.BusinessLogic.Dto.TicketDto
 @inject IFestivalService FestivalService
 @inject ITicketService TicketService
@@ -10,14 +11,29 @@
 <PageTitle>Tickets</PageTitle>
 
 <div class="ticket-container">
-    @foreach (var ticket in FestivalTickets)
+    @foreach (var ticket in FestivalTickets.Where(ticket => ticket.Quantity > 0))
     {
         <div class="ticket-card">
             <div class="ticket-main">
                 <div class="ticket-header">
                     <h2>@ticket.Name</h2>
-                    <span class="ticket-type">@ticket.Type</span>
+                    <span class="ticket-type ticket-type-@ticket.Type.ToString().ToLower()">@ticket.Type</span>
                 </div>
+
+                <div class="ticket-details">
+                    <div class="ticket-info">
+                        <div class="info-row">
+                            <span class="label">DATE:</span>
+                            <span
+                                class="value">@Festival.StartDate.ToString("d") - @Festival.EndDate.Date.ToString("d")</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Location:</span>
+                            <span class="value">@Festival.Location</span>
+                        </div>
+                    </div>
+                </div>
+
                 <AuthorizeView Roles="User">
                     <button class="buy-button" @onclick="(async () => await HandleBuy(ticket))">Purchase</button>
                 </AuthorizeView>
@@ -25,16 +41,19 @@
                     <button class="buy-button" @onclick="(() => ShowEditDialog(ticket))">Edit Ticket</button>
                 </AuthorizeView>
             </div>
-    
+
             <div class="ticket-stub">
+                <div class="stub-header">ADMIT ONE</div>
                 <div class="ticket-price">@ticket.Price.ToString("C")</div>
                 <div class="ticket-quantity">QTY: @ticket.Quantity</div>
+                <div class="stub-date">@Festival.Name</div>
+                <div class="stub-time">@Festival.Location</div>
             </div>
-    
+
             <div class="ticket-barcode"></div>
         </div>
     }
-    
+
     <Dialog Title="Update Artist" Opened="_showEditDialog" CloseButtonClicked="@(() => _showEditDialog = false)">
         <BodyContent>
             <div class="sticky-form">
@@ -67,24 +86,34 @@
     [CascadingParameter] private Task<AuthenticationState> Cookies { get; set; } = null!;
     private List<TicketGetDto> FestivalTickets { get; set; } = [];
     private TicketCreateDto EditedTicket { get; set; } = new();
+    private FestivalGetDto Festival { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        _festivalId = int.Parse(FestivalId);
-        FestivalTickets = await FestivalService.GetTicketsForFestivalAsync(_festivalId);
-        var result = await Cookies;
-        var userEmail = result.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Email)?.Value;
-
-        if (userEmail == null)
+        try
         {
-            throw new Exception("Could not retrieve email from cookies");
+            _festivalId = int.Parse(FestivalId);
+            FestivalTickets = await FestivalService.GetTicketsForFestivalAsync(_festivalId);
+            var result = await Cookies;
+            var userEmail = result.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Email)?.Value;
+
+            if (userEmail == null)
+            {
+                throw new Exception("Could not retrieve email from cookies");
+            }
+
+            _userId = await UserService.GetUserIdByEmailAsync(userEmail);
+            EditedTicket = new TicketCreateDto()
+            {
+                FestivalId = _festivalId,
+            };
+
+            Festival = await FestivalService.GetFestivalByIdAsync(_festivalId) ?? throw new Exception();
         }
-
-        _userId = await UserService.GetUserIdByEmailAsync(userEmail);
-        EditedTicket = new TicketCreateDto()
+        catch (Exception e)
         {
-            FestivalId = _festivalId,
-        };
+            await _notificationBanner.ShowNotificationAsync($"An error occured when initializing this page. Please try again later and report this issue!");
+        }
     }
 
     private async Task HandleBuy(TicketGetDto ticket)

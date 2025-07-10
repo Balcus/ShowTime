@@ -1,33 +1,28 @@
+/* Tickets Page Styles */
+
 .ticket-container {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     min-height: 100vh;
     padding: 2rem;
     margin: 0 auto;
-    max-width: 1400px;
+    max-width: 900px;
     gap: 2rem;
 }
 
 .ticket-card {
-    flex: 0 0 calc(25% - 1.5rem);
-    min-width: 350px;
-    max-width: 400px;
-}
-
-.ticket-card {
     border: 4px solid black;
-    padding: 15px;
+    padding: 20px;
     background-color: #f9f9f9;
-    margin: 1rem;
-    width: 400px;
-    height: 200px;
+    width: 100%;
+    max-width: 800px;
+    height: 280px;
     font-family: 'Courier New', Courier, monospace;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    box-shadow: 8px 8px 0 black;
+    box-shadow: 12px 12px 0 black;
     transition: transform 0.1s ease;
     position: relative;
     border-radius: 8px;
@@ -38,7 +33,7 @@
 .ticket-card::before {
     content: '';
     position: absolute;
-    right: 30%;
+    right: 25%;
     top: 0;
     bottom: 0;
     width: 2px;
@@ -52,7 +47,7 @@
 }
 
 .ticket-card:hover {
-    transform: scale(1.02);
+    transform: scale(1.01);
 }
 
 .ticket-main {
@@ -60,32 +55,33 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding-right: 1.5rem;
+    padding-right: 2rem;
     overflow: hidden;
     min-width: 0;
 }
 
 .ticket-stub {
-    width: 100px;
+    width: 160px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     border-left: 2px dashed black;
-    padding-left: 0.8rem;
+    padding-left: 1rem;
     text-align: center;
     overflow: hidden;
+    gap: 8px;
 }
 
 .ticket-header {
     border-bottom: 3px dashed rgba(0, 0, 0, 0.73);
-    margin-bottom: 8px;
-    padding-bottom: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
 }
 
 .ticket-header h2 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.6rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     white-space: nowrap;
@@ -93,15 +89,15 @@
     text-overflow: ellipsis;
 }
 
+/* Base ticket type styling */
 .ticket-type {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: bold;
     color: black;
-    background: yellow;
-    padding: 2px 6px;
+    padding: 4px 8px;
     border: 2px dashed rgba(0, 0, 0, 0.82);
     display: inline-block;
-    margin-top: 3px;
+    margin-top: 6px;
     text-transform: uppercase;
     white-space: nowrap;
     overflow: hidden;
@@ -109,17 +105,85 @@
     max-width: 100%;
 }
 
+/* Ticket type specific colors */
+.ticket-type-regular {
+    background: #87CEEB; /* Sky Blue */
+    color: #000080; /* Navy */
+    border-color: #000080;
+}
+
+.ticket-type-vip {
+    background: #FFD700; /* Gold */
+    color: #8B4513; /* Saddle Brown */
+    border-color: #8B4513;
+}
+
+.ticket-type-student {
+    background: #90EE90; /* Light Green */
+    color: #006400; /* Dark Green */
+    border-color: #006400;
+}
+
+.ticket-type-backstage {
+    background: #FF69B4; /* Hot Pink */
+    color: #8B008B; /* Dark Magenta */
+    border-color: #8B008B;
+}
+
+.ticket-type-earlybird {
+    background: #FFA500; /* Orange */
+    color: #FF4500; /* Orange Red */
+    border-color: #FF4500;
+}
+
+.ticket-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.ticket-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dotted #ccc;
+    padding-bottom: 4px;
+}
+
+.label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.value {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: black;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .buy-button {
     background: white;
     color: black;
     font-weight: bold;
     border: 3px solid black;
-    padding: 8px 12px;
+    padding: 12px 20px;
     cursor: pointer;
     transition: background 0.2s;
-    margin-top: 8px;
+    margin-top: 12px;
     text-transform: uppercase;
-    font-size: 0.9rem;
+    font-size: 1rem;
     letter-spacing: 1px;
     white-space: nowrap;
 }
@@ -129,10 +193,21 @@
     color: white;
 }
 
-.ticket-stub .ticket-price {
-    font-size: 1.2rem;
+.stub-header {
+    font-size: 0.7rem;
     font-weight: bold;
-    margin-bottom: 8px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 4px;
+    width: 100%;
+    text-align: center;
+}
+
+.ticket-stub .ticket-price {
+    font-size: 1.6rem;
+    font-weight: bold;
     color: black;
     white-space: nowrap;
     overflow: hidden;
@@ -141,7 +216,7 @@
 }
 
 .ticket-stub .ticket-quantity {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #666;
     text-transform: uppercase;
     white-space: nowrap;
@@ -150,12 +225,27 @@
     max-width: 100%;
 }
 
+.stub-date {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: black;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stub-time {
+    font-size: 0.7rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .ticket-barcode {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 80px;
-    height: 15px;
+    bottom: 15px;
+    right: 15px;
+    width: 120px;
+    height: 20px;
     background: repeating-linear-gradient(
             to right,
             black 0px,
@@ -163,4 +253,27 @@
             transparent 2px,
             transparent 4px
     );
+}
+
+.sticky-form button.btn {
+    margin-top: 1.5rem;
+    background-color: #6bcf7f;
+    border: 3px solid black;
+    color: black;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    font-family: monospace;
+    box-shadow: 4px 4px 0 black;
+    cursor: pointer;
+    transition: none;
+}
+
+.sticky-form button.btn:hover {
+    background-color: #68f685;
+    box-shadow: 6px 6px 0 black;
+}
+
+.sticky-form button.btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 black;
 }

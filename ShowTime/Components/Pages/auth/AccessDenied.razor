@@ -1,14 +1,15 @@
 @page "/access-denied"
+@inject NavigationManager Navigation
 
 <PageTitle>Access Denied</PageTitle>
 
-<div class="container">
-    <div class="card">
-        <h2 class="card_title">❌ Access Denied ❌</h2>
-        <div class="card_content">Please log in in order to access this resource.</div>
+<div class="access-denied-container">
+    <div class="access-denied-card">
+        <div class="error-code">403</div>
+        <h1 class="access-denied-title">ACCESS DENIED</h1>
+        <div class="error-message">
+            <p>You don't have permission to view this page.</p>
+            <p>This area is restricted.</p>
+        </div>
     </div>
 </div>
-
-@code {
-    
-}

@@ -124,11 +124,12 @@
 
     private async Task AddArtistAsync()
     {
-        NewArtist = new ArtistCreateDto();
         try
         {
             await ArtistService.AddArtistAsync(NewArtist);
+            NewArtist = new ArtistCreateDto();
             _artists = await ArtistService.GetAllArtistsAsync();
+            _showAddDialog = false;
         }
         catch (Exception e)
         {
