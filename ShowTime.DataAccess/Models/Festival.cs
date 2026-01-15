@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ShowTime.DataAccess.Models;
 
 public class Festival
@@ -7,6 +9,8 @@ public class Festival
     public string Location { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    
+    [Column(TypeName = "NVARCHAR(MAX)")]
     public string SplashArt { get; set; } = string.Empty;
     public int TotalAvailableTickets => Tickets.Sum(t => t.Quantity);
     
